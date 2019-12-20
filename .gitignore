@@ -12,4 +12,5 @@ doc/html
 *.user
 
 
-
+build
+lib
