@@ -143,6 +143,7 @@ void CVX_MeshRender::updateMesh(viewColoring colorScheme, CVoxelyze::stateInfoTy
 	//location
 	int vCount = vertices.size()/3;
 	if (vCount == 0) return;
+    if (vertexLinks.size()==0) return; //Sida: This return means another thread is not ready yet.
 	for (int i=0; i<vCount; i++){ //for each vertex...
 		Vec3D<float> avgPos;
 		int avgCount = 0;
