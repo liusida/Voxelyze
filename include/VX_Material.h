@@ -157,6 +157,8 @@ private:
 	friend class CVoxelyze; //give the main simulation class full access
 	friend class CVX_Voxel; //give our voxel class direct access to all the members for quick access};
 	friend class CVX_Link; 
+
+	friend class TI_Material;
 };
 
 #endif //VX_MATERIAL_H

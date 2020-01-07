@@ -183,6 +183,7 @@ private:
 	bool writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& w);
 	bool readJSON(rapidjson::Value& vxl);
 
+	friend class TI_VoxelyzeKernel;
 };
 
 

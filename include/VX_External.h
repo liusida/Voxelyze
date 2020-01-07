@@ -15,15 +15,8 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 #include "Vec3D.h"
 #include "Quat3D.h"
 
-typedef unsigned char dofObject;  //Bits: 0 0 Tz, Ty, Tz, Z, Y, X. 0 if free, 1 if fixed
-enum dofComponent {
-	X_TRANSLATE=1<<0,
-	Y_TRANSLATE=1<<1,
-	Z_TRANSLATE=1<<2,
-	X_ROTATE=1<<3,
-	Y_ROTATE=1<<4,
-	Z_ROTATE=1<<5
-};
+#include "types.h"
+
 inline void dofSet(dofObject& obj, dofComponent dof, bool set) {set ? obj|=dof : obj&=~dof;}
 inline void dofSetAll(dofObject& obj, bool set) {set ? obj|=0x3F : obj&=~0x3F;}
 inline bool dofIsSet(dofObject obj, dofComponent dof){return (dof&obj)?true:false;}
@@ -97,6 +90,8 @@ private:
 	Quat3D<double>* _extRotationQ; //cached quaternion rotation (pointer to only create if needed)
 
 	void rotationChanged(); //called to keep cached quaternion rotation in sync
+
+	friend class TI_External;
 };
 
 
