@@ -5,7 +5,7 @@ project(Voxelyze VERSION 0.1.0)
 # enable_testing()
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
-file( GLOB SRC ${CMAKE_CURRENT_LIST_DIR}/src/*.c*)
+file( GLOB SRC ${CMAKE_CURRENT_LIST_DIR}/src/*.c* )
 
 add_executable(Voxelyze main.cpp ${SRC})
 

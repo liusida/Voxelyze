@@ -73,6 +73,8 @@ protected:
 	friend class CVoxelyze; //give the main simulation class full access
 	friend class CVX_Voxel; //give our voxel class direct access to all the members for quick access};
 	friend class CVX_MaterialLink;
+
+	friend class TI_MaterialVoxel;
 };
 
 

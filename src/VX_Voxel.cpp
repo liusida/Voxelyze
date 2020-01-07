@@ -343,22 +343,22 @@ Vec3D<float> CVX_Voxel::poissonsStrain()
 }
 
 
-float CVX_Voxel::transverseStrainSum(CVX_Link::linkAxis axis)
+float CVX_Voxel::transverseStrainSum(linkAxis axis)
 {
 	if (mat->poissonsRatio() == 0) return 0;
 	
 	Vec3D<float> psVec = poissonsStrain();
 
 	switch (axis){
-	case CVX_Link::X_AXIS: return psVec.y+psVec.z;
-	case CVX_Link::Y_AXIS: return psVec.x+psVec.z;
-	case CVX_Link::Z_AXIS: return psVec.x+psVec.y;
+	case X_AXIS: return psVec.y+psVec.z;
+	case Y_AXIS: return psVec.x+psVec.z;
+	case Z_AXIS: return psVec.x+psVec.y;
 	default: return 0.0f;
 	}
 
 }
 
-float CVX_Voxel::transverseArea(CVX_Link::linkAxis axis)
+float CVX_Voxel::transverseArea(linkAxis axis)
 {
 	float size = (float)mat->nominalSize();
 	if (mat->poissonsRatio() == 0) return size*size;
@@ -366,9 +366,9 @@ float CVX_Voxel::transverseArea(CVX_Link::linkAxis axis)
 	Vec3D<> psVec = poissonsStrain();
 
 	switch (axis){
-	case CVX_Link::X_AXIS: return (float)(size*size*(1+psVec.y)*(1+psVec.z));
-	case CVX_Link::Y_AXIS: return (float)(size*size*(1+psVec.x)*(1+psVec.z));
-	case CVX_Link::Z_AXIS: return (float)(size*size*(1+psVec.x)*(1+psVec.y));
+	case X_AXIS: return (float)(size*size*(1+psVec.y)*(1+psVec.z));
+	case Y_AXIS: return (float)(size*size*(1+psVec.x)*(1+psVec.z));
+	case Z_AXIS: return (float)(size*size*(1+psVec.x)*(1+psVec.y));
 	default: return size*size;
 	}
 }

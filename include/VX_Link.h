@@ -19,7 +19,7 @@ See <http://www.opensource.org/licenses/lgpl-3.0.html> for license details.
 class CVX_Voxel;
 class CVX_MaterialLink;
 
-
+#include "types.h"
 
 //!Defines a solid link between two adjacent voxels and holds its current state
 /*!A CVX_Link calculates the force and moments between two voxels given their relative positions and orientations.
@@ -32,14 +32,6 @@ Information pertaining to one voxel or the other is indicated by the boolean par
 */
 class CVX_Link {
 	public:
-
-	//! Defines an axis (X, Y, or Z)
-	enum linkAxis {			
-		X_AXIS = 0,			//!< X Axis
-		Y_AXIS = 1,			//!< Y Axis
-		Z_AXIS = 2			//!< Z Axis
-	};
-
 
 	CVX_Link(CVX_Voxel* voxel1, CVX_Voxel* voxel2, CVX_MaterialLink* material); //!< Constructs a link object between two adjacent voxels that represents a solid material connection. The order of voxel1 and voxel2 is unimportant, but the specified linkDirection is interpreted as the originating from voxel1 and pointing to voxel2. A CVX_LinkMaterial representing the desired combination of the two voxel materials must be precomputed and passed as a parameter as well. @param[in] voxel1 One voxel @param[in] voxel2 The other voxel @param[in] material The material properties for this link.
 	void reset(); //!< Resets all current state information about this link to the initial value.
@@ -120,6 +112,8 @@ private:
 	friend class CVoxelyze;
 	friend class CVX_LinearSolver;
 	friend class CVXS_SimGLView; //TEMPORARY
+
+	friend class TI_Link;
 };
 
 
