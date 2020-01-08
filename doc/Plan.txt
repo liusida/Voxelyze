@@ -1,0 +1,17 @@
+# Voxelyze3 Basic Plan
+
+Scientists will use Python (or any other languages) to design experiments. 
+
+A batch of VXA files (of one generation) should be generated, and please put the files in `/taskPool/0_NewTasks/` folder.
+
+A whatever file should be put in `/taskPool/CallTaskManager/` folder.
+
+There will be a "TaskManager" monitoring the `CallTaskManager` folder. 
+
+If there's a call, start collecting VXA files in `0_NewTasks`, create a subfolder `Batch_N` in `1_RunningTasks`, and move them to `Batch_N` and start a thread "Simulation" to deal with `Batch_N`.
+
+"Simulation" configures a batch of simulations, copy things to GPU memory, and start a batch of CUDA threads running them. (Be sure using run<<<multiple, multiple>>>() to start a batch of CUDA thread, and use cudaDeviceSynchronize() to wait for them)
+
+"Simulation" will tell "TaskManager" after all simulations are done using callback, and "TaskManager" should move the whole `Batch_N` folder with VXA files in it to `2_FinishedTasks`.
+
+"Simulation" can write some output files after all simulations are done.
