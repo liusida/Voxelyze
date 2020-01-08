@@ -10,4 +10,6 @@ So all simulational calculation in Voxelyze 3 will be running via CUDA
 
 The distance is a little bit different, and people think it's fine. So Voxelyze 3 could have a little difference as well. Let's see.
 
+## VXA, VXC File Format
 
+There're many concepts and terminologies in the configure files, and here is [an incomplete note](https://github.com/liusida/Voxelyze/blob/dev-CUDA/doc/Format_of_VXA.txt) (I like VoxCAD, so I also point out where a certain parameter is used in VoxCAD).
