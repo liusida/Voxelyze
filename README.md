@@ -2,7 +2,9 @@
 
 In this branch, I am going to implement another version of Voxelyze. Let's call it Voxelyze 3 for now.
 
-So all simulational calculation in Voxelyze 3 will be running via CUDA
+So all simulational calculation in Voxelyze 3 will be running via CUDA.
+
+If you would like to help or are simply interested, please contact me (Sida.Liu.1 at uvm.edu). (This project will mainly use C++)
 
 ## First let me compare Voxelyze 1 and Voxelyze 2
 
