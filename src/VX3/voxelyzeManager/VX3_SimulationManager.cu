@@ -79,11 +79,15 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     double final_z = 0.0;
     VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
     cudaMemcpy( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost );
-    auto ret = &result_voxelyze_kernel[0];
-    printf("result:\n \tposition: %e %e %e\n\ttime: %f\n", 
-    ret->currentCenterOfMass.x, ret->currentCenterOfMass.y, ret->currentCenterOfMass.z,
-    ret->currentTime
-    );
+    //TODO: how to communicate with experiments? files? or other methods?
+    printf("====[RESULTS for %s]====", batchFolder.filename());
+    for (int i=0;i<num_tasks;i++) {
+        auto ret = &result_voxelyze_kernel[i];
+        printf("Task %d: position (in mm): %f %f %f, end time: %f\n", i,
+        ret->currentCenterOfMass.x*1000, ret->currentCenterOfMass.y*1000, ret->currentCenterOfMass.z*1000,
+        ret->currentTime
+        );
+    }
     //6. cleanup
     for (auto p:h_d_voxelyze_3) {
         p->cleanup();
