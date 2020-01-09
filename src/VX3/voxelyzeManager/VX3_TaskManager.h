@@ -12,6 +12,7 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
+#define PATH_POOL "./taskPool/"
 #define PATH_CALLS "./taskPool/CallTaskManager/"
 #define PATH_NEW_TASK "./taskPool/0_NewTasks/"
 #define PATH_RUNNING "./taskPool/1_RunningTasks/"
@@ -28,6 +29,7 @@ public:
     bool checkForCalls();
     fs::path batchVXAFiles();
     void cleanBatchFolder(fs::path batchFolder);
+    void makeTaskPool();
 };
 
 #endif // VX3_TASKMANAGER_H

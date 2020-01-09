@@ -39,7 +39,18 @@ void VX3_TaskManager::cleanBatchFolder(fs::path batchFolder) {
     printf("One batch of simulations finished. (%s)\n", batchFolder.filename().c_str());
 }
 
+void VX3_TaskManager::makeTaskPool() {
+    printf("Making the folders for tasks: %s\n", fs::canonical(fs::path(PATH_POOL)).string().c_str());
+    fs::create_directory(PATH_POOL);
+    fs::create_directory(PATH_CALLS);
+    fs::create_directory(PATH_NEW_TASK);
+    fs::create_directory(PATH_RUNNING);
+    fs::create_directory(PATH_FINISHED);
+    printf("Please put your VXA files in %s, and touch a new file in %s to tell the manager to start simulations.\n", PATH_NEW_TASK, PATH_CALLS);
+}
 void VX3_TaskManager::start() {
+
+    makeTaskPool();
 
     while(1) {
         try {
