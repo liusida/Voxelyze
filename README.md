@@ -15,3 +15,30 @@ The distance is a little bit different, and people think it's fine. So Voxelyze 
 ## VXA, VXC File Format
 
 There're many concepts and terminologies in the configure files, and here is [an incomplete note](https://github.com/liusida/Voxelyze/blob/dev-CUDA/doc/Format_of_VXA.txt) (I like VoxCAD, so I also point out where a certain parameter is used in VoxCAD).
+
+## Test run
+
+Many dependencies are needed, like CUDA 10.1, etc. If you can run Titan, your environment is probably OK.
+
+To build:
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . -j 10
+cp voxelyzeManager ../
+```
+
+To run:
+
+```bash
+./voxelyzeManager
+```
+
+To feed in VXA files:
+
+```bash
+cp VXA_examples/* taskPool/0_NewTasks/
+touch taskPool/CallTaskManager/any
+```
