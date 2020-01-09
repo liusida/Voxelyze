@@ -16,3 +16,9 @@ build
 lib
 
 .vscode
+tmp
+
+taskPool/*/*.vxa
+taskPool/*/Batch_*
+
+VXA_examples

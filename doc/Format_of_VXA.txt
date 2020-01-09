@@ -5,7 +5,7 @@ This is a note for the format of configure files (VXA, VXC, etc...).
         Integrator              0                           //0 = euler in older versions
         DtFrac                  0.9                         //timestep % optimal dt
     Damping
-        BondDampingZ            0.1                         //Physics Settings -> Other -> Bulk damping ratio (z)
+        BondDampingZ            0.1                         //Physics Settings -> Other -> Bulk damping ratio (z) (zetaInternal in VX2)
         ColDampingZ             1.0                         //Collision damping ratio (z)
         SlowDampingZ            1.0                         //Ground damping ratio (z)
     Collisions

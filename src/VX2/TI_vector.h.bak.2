@@ -1,0 +1,81 @@
+//Instead of reallocate every time, use over-allocation to reduce memory copy.
+
+#if !defined(TI_VECTOR_H)
+#define TI_VECTOR_H
+
+#include <vector>
+#include "TI_Utils.h"
+
+#define VECTOR_MAX_CHUNK_SIZE 1024
+template <typename T>
+class TI_vector {
+public:
+    CUDA_CALLABLE_MEMBER TI_vector<T>() {
+        num_main = 0;
+        cudaMalloc()
+    }
+
+    CUDA_CALLABLE_MEMBER ~TI_vector<T>() {
+    }
+
+    TI_vector<T>(const std::vector<T>& p) {
+        if (p.size() > VECTOR_MAX_CHUNK_SIZE) {
+            printf("ERROR: reached VECTOR_MAX_CHUNK_SIZE.\n");
+        }
+        set(p);
+    }
+
+	TI_vector& operator=(const std::vector<T>& p) { return set(p); }
+
+	TI_vector& set(const std::vector<T>& p) {
+        num_main = p.size();
+        T* temp = (T*) malloc(num_main*sizeof(T));
+        for (unsigned i=0;i<num_main;i++) {
+            temp[i] = p[i];
+        }
+        cudaMemcpy(main, temp, num_main*sizeof(T), cudaMemcpyHostToDevice);
+        delete temp;
+        return *this; 
+    }
+
+    CUDA_DEVICE void push_back(T p, bool debug=false) {
+        unsigned current_cursor;
+        #ifdef __CUDACC__
+        current_cursor = atomicAdd(&num_main,1);
+        #else
+        current_cursor = num_main++;
+        #endif
+        main[current_cursor] = p;
+    }
+
+    CUDA_DEVICE T get (unsigned index) {
+        return main[index];
+    }
+
+    CUDA_DEVICE T &operator[] (unsigned index) {
+        return main[index];
+    }
+
+    CUDA_CALLABLE_MEMBER unsigned size() {
+        return num_main;
+    }
+    
+    CUDA_DEVICE void clear() {
+        num_main = 0;
+    }
+
+    CUDA_DEVICE bool find(T value) {
+        for (unsigned i=0;i<num_main;i++) {
+            if (main[i]==value) {
+                return true;
+            }
+        }
+        return false;
+    }
+/* data */
+    //unsigned sizeof_chunk;
+    T* main;
+    unsigned num_main;
+};
+
+#endif // TI_VECTOR_H
