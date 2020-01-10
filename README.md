@@ -10,35 +10,14 @@ If you would like to help or are simply interested, please contact me (Sida.Liu.
 
 ![VX1 vs VX2](https://github.com/liusida/Voxelyze/blob/dev-CUDA/doc/VX1vsVX2.png?raw=true)
 
-The distance is a little bit different, and people think it's fine. So Voxelyze 3 could have a little difference as well. Let's see.
+The distances are a little bit different, and people think it's fine. So Voxelyze 3 could have a little difference as well. Let's see.
 
 ## VXA, VXC File Format
 
 There're many concepts and terminologies in the configure files, and here is [an incomplete note](https://github.com/liusida/Voxelyze/blob/dev-CUDA/doc/Format_of_VXA.txt) (I like VoxCAD, so I also point out where a certain parameter is used in VoxCAD).
 
-## Test run
+## Install the development environment
 
-Many dependencies are needed, like CUDA 10.1, etc. If you can run Titan, your environment is probably OK.
+Install CUDA is a pain, but luckily NVidia provides docker images for those environments. Assuming you have docker installed, and let's install the development environement together :)
 
-To build:
-
-```bash
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-cmake --build . -j 10
-cp voxelyzeManager ../
-```
-
-To run:
-
-```bash
-./voxelyzeManager
-```
-
-To feed in VXA files:
-
-```bash
-cp VXA_examples/* taskPool/0_NewTasks/
-touch taskPool/CallTaskManager/any
-```
+[Here are the steps](https://github.com/liusida/Voxelyze/blob/dev-CUDA/doc/install.md)
