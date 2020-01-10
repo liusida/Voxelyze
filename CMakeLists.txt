@@ -37,4 +37,4 @@ target_compile_options(voxelyze.3.0 PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=com
 target_compile_options(voxelyzeManager PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=compute_60 -code=compute_60>)
 list(APPEND CMAKE_CUDA_FLAGS "-gencode=arch=compute_60,code=sm_60")
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
