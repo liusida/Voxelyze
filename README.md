@@ -18,6 +18,6 @@ There're many concepts and terminologies in the configure files, and here is [an
 
 ## Install the development environment
 
-Install CUDA is a pain, but luckily NVidia provides docker images for those environments. Assuming you have docker installed, and let's install the development environement together :)
+Installing CUDA is a pain, but luckily NVidia provides docker images for those environments. Assuming you have docker installed, and let's install the development environement together :)
 
 [Here are the steps](https://github.com/liusida/Voxelyze/blob/dev-CUDA/doc/install.md)
