@@ -15,7 +15,7 @@ And wait for 30 mins, you will be all set, then you can start the virtual enviro
 docker run -it --gpus all voxelyze
 ```
 
-remember, docker is designed to for clean deployment, so you may lost all your changes inside the container after shutting down the virtual environment. You may want to learn more about docker to save your changes inside docker environment. If you accidentally exit the docker container, use this to re-join (replace \<container-name> by what you see in `docker ps -a`):
+remember, docker is designed for clean deployment, so you may lost all your changes inside the container after shutting down the virtual environment. You may want to learn more about docker to save your changes inside docker environment. If you accidentally exit the docker container, use this to re-join (replace \<container-name> by what you see in `docker ps -a`):
 
 ```bash
 docker ps -a
