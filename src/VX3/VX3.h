@@ -22,4 +22,11 @@
     #endif
 #endif
 
+
+#define COLORCODE_RED "\033[0;31m" 
+#define COLORCODE_BOLD_RED "\033[1;31m" 
+#define COLORCODE_GREEN "\033[0;32m" 
+#define COLORCODE_BLUE "\033[0;34m" 
+#define COLORCODE_RESET "\033[0m" 
+
 #endif // VX3_H

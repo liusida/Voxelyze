@@ -7,7 +7,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i<num_tasks) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
-        printf("\033[0;32mSimulation %d runs.\033[0m\t", i);
+        printf(COLORCODE_GREEN "Simulation %d runs.\t" COLORCODE_RESET, i);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
             // if (j%1000==0) {
@@ -16,12 +16,12 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
             //     printf("Current Location (in meter): %f %f %f\n", d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
             // }
             if (!d_v3->doTimeStep()) {
-                printf("\033[1;31m\nSimulation %d Diverged.\033[0m\n", i);
+                printf(COLORCODE_BOLD_RED "\nSimulation %d Diverged.\n" COLORCODE_RESET, i);
                 break;
             }
         }
         d_v3->updateCurrentCenterOfMass();
-        printf("\033[0;34mSimulation %d ends.\033[0m\t", i);
+        printf(COLORCODE_BLUE "Simulation %d ends.\t" COLORCODE_RESET, i);
     }
 }
 
