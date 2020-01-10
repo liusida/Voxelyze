@@ -73,7 +73,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     if (numBlocks == 1)
         threadsPerBlock = num_tasks;
     CUDA_Simulation<<<numBlocks,threadsPerBlock>>>(d_voxelyze_3, num_tasks);
-
+    gpuErrchk(cudaGetLastError());
     //4. wait
     cudaDeviceSynchronize();
     
