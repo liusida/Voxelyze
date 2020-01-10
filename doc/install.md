@@ -2,6 +2,15 @@
 
 Installing CUDA is a pain, but luckily NVidia provides docker images for those environments. Assuming you have docker installed, and let's install the development environement together :)
 
+```bash
+cd docker
+docker build .
+```
+
+And wait for 30 mins, you will be all set.
+
+= Or, here are steps you can follow manually: = 
+
 In host
 ```bash
 docker pull nvidia/cuda:10.1-base-ubuntu16.04
@@ -10,14 +19,14 @@ docker run -it --gpus all nvidia/cuda:10.1-base-ubuntu16.04
 
 In docker
 ```bash
-apt update
-apt install -y git wget tar libssl-dev software-properties-common
+apt-get update
+apt-get install -y git wget tar libssl-dev software-properties-common
 
 #install cmake
 wget https://github.com/Kitware/CMake/releases/download/v3.16.2/cmake-3.16.2.tar.gz
 tar -xf cmake-3.16.2.tar.gz
 cd cmake-3.16.2
-./bootstrap --parallel=n
+./bootstrap --parallel=10
 make -j 10
 make install
 export PATH=/usr/local/bin:$PATH
@@ -25,7 +34,7 @@ export PATH=/usr/local/bin:$PATH
 
 #install boost
 wget https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
-tar -xf boost_1_66_0
+tar -xf boost_1_66_0.tar.gz
 cd boost_1_66_0
 ./bootstrap.sh
 # only build filesystem and thread to save time
@@ -34,8 +43,8 @@ cd boost_1_66_0
 
 #install gcc-8
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
-apt update
-apt install -y gcc-8 g++-8 
+apt-get update
+apt-get install -y gcc-8 g++-8 
 update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10
 update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10
 # change default g++ to g++-8
@@ -49,6 +58,11 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . -j 10
 cd ../
+mkdir taskPool
+mkdir taskPool/0_NewTasks
+mkdir taskPool/1_RunningTasks
+mkdir taskPool/2_FinishedTasks
+mkdir taskPool/CallTaskManager
 #To feed in VXA files:
 cp VXA_examples/* taskPool/0_NewTasks/ ; touch taskPool/CallTaskManager/a
 ./build/voxelyzeManager
