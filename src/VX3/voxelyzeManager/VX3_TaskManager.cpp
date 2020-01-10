@@ -28,7 +28,7 @@ fs::path VX3_TaskManager::batchVXAFiles() {
             count ++;
         }
     }
-    printf("New batch with %d VXA files.\n", count);
+    printf("New batch with %d VXA files was found.\n", count);
     return batchFolder;
 }
 
@@ -36,7 +36,7 @@ void VX3_TaskManager::cleanBatchFolder(fs::path batchFolder) {
     fs::path finished = PATH_FINISHED;
     finished /= batchFolder.filename();
     fs::rename(batchFolder, finished);
-    printf("One batch of simulations finished. (%s)\n", batchFolder.filename().c_str());
+    printf("One batch folder moved to FINISHED. (%s)\n", batchFolder.filename().c_str());
 }
 
 void VX3_TaskManager::makeTaskPool() {

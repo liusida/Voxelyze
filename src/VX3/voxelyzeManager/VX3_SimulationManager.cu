@@ -7,10 +7,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i<num_tasks) {
         VX3_VoxelyzeKernel *d_v3 = &d_voxelyze_3[i];
-        if (i==1) {
-            printf("debug.\n");
-        }
-        printf("--> simulation %d runs.\n", i);
+        printf("\033[0;32mSimulation %d runs.\033[0m\t", i);
         for (int j=0;j<1000000;j++) { //Maximum Steps 1000000
             if (d_v3->StopConditionMet()) break;
             // if (j%1000==0) {
@@ -19,17 +16,17 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
             //     printf("Current Location (in meter): %f %f %f\n", d_v3->currentCenterOfMass.x, d_v3->currentCenterOfMass.y, d_v3->currentCenterOfMass.z);
             // }
             if (!d_v3->doTimeStep()) {
-                printf("--> simulation %d Diverged.\n", i);
+                printf("\033[1;31m\nSimulation %d Diverged.\033[0m\n", i);
                 break;
             }
         }
         d_v3->updateCurrentCenterOfMass();
-        printf("--> simulation %d ends.\n", i);
+        printf("\033[0;34mSimulation %d ends.\033[0m\t", i);
     }
 }
 
 void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder) {
-    //TODO: 
+    if (fs::is_empty(batchFolder)) return;
     //1. read every VXA files
     std::vector<std::string> filenames;
     VX3_VoxelyzeKernel * d_voxelyze_3;
@@ -109,8 +106,8 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     }
     pt::write_xml((batchFolder/"report.xml").string(), xml_tree, \
                         std::locale(), pt::xml_writer_make_settings<std::string>('\t', 1));
-    printf("A report has been produced: %s\n", (batchFolder/"report.xml").c_str());
-    printf("Best distance of this generation is %f\n", normAbsoluteDisplacement[0].first);
+    printf("Best distance of this generation is %f (x voxelSize).\n", normAbsoluteDisplacement[0].first);
+    printf("A detailed report.xml has been produced in the batch folder.\n");
 
     //6. cleanup
     for (auto p:h_d_voxelyze_3) {
