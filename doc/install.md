@@ -9,7 +9,19 @@ cd docker
 docker build .
 ```
 
-And wait for 30 mins, you will be all set.
+And wait for 30 mins, you will be all set, then you can start the virtual environment with:
+
+```bash
+docker run -it --gpus all voxelyze
+```
+
+remember, docker is designed to for clean deployment, so you may lost all your changes inside the container after shutting down the virtual environment. You may want to learn more about docker to save your changes inside docker environment. If you accidentally exit the docker container, use this to re-join:
+
+```bash
+docker ps -a
+docker restart [container-name]
+docker attach [container-name]
+```
 
 = Or, here are steps you can follow manually: = 
 
