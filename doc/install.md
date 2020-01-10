@@ -2,7 +2,7 @@
 
 Installing CUDA is a pain, but luckily NVidia provides docker images for those environments. Assuming you have docker installed, and let's install the development environement together :)
 
-(But how to install Docker? [Official Document](https://docs.docker.com/v17.09/engine/installation/linux/docker-ce/ubuntu/) [Easy Steps](https://computingforgeeks.com/how-to-install-docker-on-ubuntu/))
+(But how to install Docker? [Official Document](https://docs.docker.com/v17.09/engine/installation/linux/docker-ce/ubuntu/) and [Easy Steps](https://computingforgeeks.com/how-to-install-docker-on-ubuntu/))
 
 ```bash
 cd docker
