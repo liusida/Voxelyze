@@ -18,6 +18,7 @@ add_library(voxelyze.3.0 ${SRC} ${VX3_SRC} ${VX2_SRC} ${VX1_SRC})
 add_executable(voxelyzeManager ${voxelyzeManager})
 target_link_libraries(voxelyzeManager PUBLIC voxelyze.3.0)
 
+set(Boost_USE_STATIC_LIBS   ON)
 find_package(Boost REQUIRED COMPONENTS filesystem thread)
 target_link_libraries(voxelyzeManager PUBLIC ${Boost_LIBRARIES})
 
