@@ -31,6 +31,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
 void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder) {
     //TODO: 
     //1. read every VXA files
+    std::vector<std::string> filenames;
     VX3_VoxelyzeKernel * d_voxelyze_3;
     std::vector<VX3_VoxelyzeKernel *> h_d_voxelyze_3;
     int batch_size = 0;
@@ -45,6 +46,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
         MainEnv.pObj = &MainObj; //connect environment to object
         MainSim.pEnv = &MainEnv; //connect Simulation to envirnment
         MainSim.LoadVXAFile(file.path().string());
+        filenames.push_back(file.path().string());
         std::string err_string; //need to link this up to get info back...
         if (!MainSim.Import(NULL, NULL, &err_string)){
             std::cout<<err_string;
@@ -76,18 +78,40 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     cudaDeviceSynchronize();
     
     //5. read result
+    //sort and write normCOMdisplacement.Length()
+    //norm(current Center of mass - initial CoM / voxSize)
+
     double final_z = 0.0;
     VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
     cudaMemcpy( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost );
     //TODO: how to communicate with experiments? files? or other methods?
-    printf("====[RESULTS for %s]====", batchFolder.filename());
+    printf("\n====[RESULTS for %s]====\n", batchFolder.filename().c_str());
+    std::vector< std::pair<double, int> > normAbsoluteDisplacement;
     for (int i=0;i<num_tasks;i++) {
-        auto ret = &result_voxelyze_kernel[i];
-        printf("Task %d: position (in mm): %f %f %f, end time: %f\n", i,
-        ret->currentCenterOfMass.x*1000, ret->currentCenterOfMass.y*1000, ret->currentCenterOfMass.z*1000,
-        ret->currentTime
-        );
+        double x = result_voxelyze_kernel[i].currentCenterOfMass.x;
+        double y = result_voxelyze_kernel[i].currentCenterOfMass.y;
+        double z = result_voxelyze_kernel[i].currentCenterOfMass.y;
+        double v = result_voxelyze_kernel[i].voxSize;
+        x = x/v; y = y/v; z = z/v;
+        double dist = sqrt(x*x + y*y + z*z);
+        normAbsoluteDisplacement.push_back( std::make_pair(dist,i) );
     }
+    std::sort(normAbsoluteDisplacement.begin(), normAbsoluteDisplacement.end());
+    std::reverse(normAbsoluteDisplacement.begin(), normAbsoluteDisplacement.end());
+    pt::ptree xml_tree;
+    xml_tree.put("voxelyzeManager.batchName", batchFolder.filename());
+    for (auto p : normAbsoluteDisplacement) {
+        pt::ptree task;
+        task.put("normAbsoluteDisplacement", p.first);
+        task.put("taskId", p.second);
+        task.put("VXAFilename", filenames[p.second]);
+        xml_tree.add_child("voxelyzeManager.Report", task);
+    }
+    pt::write_xml((batchFolder/"report.xml").string(), xml_tree, \
+                        std::locale(), pt::xml_writer_make_settings<std::string>('\t', 1));
+    printf("A report has been produced: %s\n", (batchFolder/"report.xml").c_str());
+    printf("Best distance of this generation is %f\n", normAbsoluteDisplacement[0].first);
+
     //6. cleanup
     for (auto p:h_d_voxelyze_3) {
         p->cleanup();

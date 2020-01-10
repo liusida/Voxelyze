@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<Voxelyze_Sim_Result Version="1.0">
+    <Fitness>
+        <VoxelNumber>140</VoxelNumber>
+        <normAbsoluteDisplacement>0.741654</normAbsoluteDisplacement>
+        <avgForwardModelError>0</avgForwardModelError>
+        <avgRoll>0.187038</avgRoll>
+        <avgPitch>0.0568455</avgPitch>
+        <avgYaw>0.0542901</avgYaw>
+        <avgStress>167915</avgStress>
+        <avgPressure>622807</avgPressure>
+        <integratedTiltError>0</integratedTiltError>
+        <avgProprioceptiveError>0.298173</avgProprioceptiveError>
+        <avgInteroceptiveError>790722</avgInteroceptiveError>
+        <AverageStiffnessChange>0</AverageStiffnessChange>
+        <normDistX>0.738816</normDistX>
+        <normDistY>0.0229418</normDistY>
+        <normDistZ>0.0606204</normDistZ>
+        <normAbsDistPhase1>-99999</normAbsDistPhase1>
+        <normAbsDistPhase2>-99999</normAbsDistPhase2>
+        <avgStiffChange1>-99999</avgStiffChange1>
+        <avgStiffChange2>-99999</avgStiffChange2>
+    </Fitness>
+</Voxelyze_Sim_Result>

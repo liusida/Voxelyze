@@ -2,8 +2,13 @@
 #define VX3_SIMULATION_MANAGER
 
 #include <thread>
+#include <utility> 
+#include <vector>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+namespace pt = boost::property_tree;
 
 #include "VX3_TaskManager.h"
 
@@ -16,6 +21,8 @@ public:
     
     //Overload operator to start thread
     void operator()(VX3_TaskManager* tm, fs::path batchFolder);
+
+
 };
 
 #endif // VX3_SIMULATION_MANAGER
