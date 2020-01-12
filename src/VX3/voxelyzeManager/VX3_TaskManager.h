@@ -25,7 +25,7 @@ private:
 public:
     VX3_TaskManager()=default;
 
-    void start();
+    void start(int how_many_runs);
     bool checkForCalls();
     fs::path batchVXAFiles();
     void cleanBatchFolder(fs::path batchFolder);

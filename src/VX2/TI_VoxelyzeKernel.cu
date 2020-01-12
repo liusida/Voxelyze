@@ -13,9 +13,9 @@ currentTime(vx->currentTime), nearbyStale(true), collisionsStale(true)
     
     for (auto mat:vx->linkMats) {
         TI_MaterialLink * d_mat;
-        gpuErrchk(cudaMalloc((void **) &d_mat, sizeof(TI_MaterialLink)));
+        VcudaMalloc((void **) &d_mat, sizeof(TI_MaterialLink));
         TI_MaterialLink temp = TI_MaterialLink(mat);
-        gpuErrchk(cudaMemcpy(d_mat, &temp, sizeof(TI_MaterialLink), cudaMemcpyHostToDevice));
+        VcudaMemcpy(d_mat, &temp, sizeof(TI_MaterialLink), VcudaMemcpyHostToDevice);
         d_linkMats.push_back(d_mat);
         h_linkMats.push_back(mat);
     }
@@ -23,7 +23,7 @@ currentTime(vx->currentTime), nearbyStale(true), collisionsStale(true)
     for (auto voxel: vx->voxelsList) {
         //alloc a GPU memory space
         TI_Voxel * d_voxel;
-        gpuErrchk(cudaMalloc((void **) &d_voxel, sizeof(TI_Voxel)));
+        VcudaMalloc((void **) &d_voxel, sizeof(TI_Voxel));
         //save the pointer
         d_voxels.push_back(d_voxel);
         //save host pointer as well
@@ -32,10 +32,10 @@ currentTime(vx->currentTime), nearbyStale(true), collisionsStale(true)
     for (auto link: vx->linksList) {
         //alloc a GPU memory space
         TI_Link * d_link;
-        gpuErrchk(cudaMalloc((void **) &d_link, sizeof(TI_Link)));
+        VcudaMalloc((void **) &d_link, sizeof(TI_Link));
         //set values for GPU memory space
         TI_Link temp = TI_Link(link, this);
-        gpuErrchk(cudaMemcpy(d_link, &temp, sizeof(TI_Link), cudaMemcpyHostToDevice));
+        VcudaMemcpy(d_link, &temp, sizeof(TI_Link), VcudaMemcpyHostToDevice);
         //save the pointer
         d_links.push_back(d_link);
         //save host pointer as well
@@ -46,14 +46,14 @@ currentTime(vx->currentTime), nearbyStale(true), collisionsStale(true)
         CVX_Voxel * voxel = vx->voxelsList[i];
         //set values for GPU memory space
         TI_Voxel temp(voxel, this);
-        gpuErrchk(cudaMemcpy(d_voxel, &temp, sizeof(TI_Voxel), cudaMemcpyHostToDevice));
+        VcudaMemcpy(d_voxel, &temp, sizeof(TI_Voxel), VcudaMemcpyHostToDevice);
     }
 
 
-    gpuErrchk(cudaMalloc((void**)&d_collisionsStale, sizeof(bool)));
+    VcudaMalloc((void**)&d_collisionsStale, sizeof(bool));
 
-    gpuErrchk(cudaMalloc((void **)&d_collisions, sizeof(TI_vector<TI_Collision *>)));
-    gpuErrchk(cudaMemcpy(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), cudaMemcpyHostToDevice));
+    VcudaMalloc((void **)&d_collisions, sizeof(TI_vector<TI_Collision *>));
+    VcudaMemcpy(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyHostToDevice);
 }
 
 TI_VoxelyzeKernel::~TI_VoxelyzeKernel()
@@ -74,10 +74,10 @@ void TI_VoxelyzeKernel::simpleGPUFunction() {
     int mem_size = num * sizeof(int);
 
     a = (int *) malloc(mem_size);
-    cudaMalloc( &d_a, mem_size );
+    VcudaMalloc( &d_a, mem_size );
 
     gpu_function_1<<<1,num>>>(d_a, num);
-    cudaMemcpy(a, d_a, mem_size, cudaMemcpyDeviceToHost);
+    VcudaMemcpy(a, d_a, mem_size, VcudaMemcpyDeviceToHost);
 
     for (int i=0;i<num;i++) {
         std::cout<< a[i] << ",";
@@ -219,16 +219,16 @@ void TI_VoxelyzeKernel::updateCollisions() {
     }
     
     //check if any voxels have moved far enough to make collisions stale
-    gpuErrchk( cudaMemcpy(d_collisionsStale, &collisionsStale, sizeof(bool), cudaMemcpyHostToDevice) );
+    VcudaMemcpy(d_collisionsStale, &collisionsStale, sizeof(bool), VcudaMemcpyHostToDevice);
     gpu_check_moved_far_enough<<<gridSize_voxels, blockSize_voxels>>>(thrust::raw_pointer_cast(d_voxels.data()), num_voxels, d_collisionsStale, recalcDist);
     cudaDeviceSynchronize();
-    gpuErrchk( cudaMemcpy(&collisionsStale, d_collisionsStale, sizeof(bool), cudaMemcpyDeviceToHost) );
+    VcudaMemcpy(&collisionsStale, d_collisionsStale, sizeof(bool), VcudaMemcpyDeviceToHost);
     
     if (collisionsStale){
         regenerateCollisions(watchRadiusMm*watchRadiusMm);
         collisionsStale = false;
     }
-    gpuErrchk(cudaMemcpy(&h_collisions, d_collisions, sizeof(TI_vector<TI_Collision *>), cudaMemcpyDeviceToHost));
+    VcudaMemcpy(&h_collisions, d_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyDeviceToHost);
 
     //check if any voxels have moved far enough to make collisions stale
     int num_collisions = h_collisions.size();
@@ -268,12 +268,12 @@ void TI_VoxelyzeKernel::readVoxelsPosFromDev() {
 
     for (unsigned i=0;i<d_voxels.size();i++) {
         TI_Voxel* temp = (TI_Voxel*) malloc(sizeof(TI_Voxel));
-        cudaMemcpy(temp, d_voxels[i], sizeof(TI_Voxel), cudaMemcpyDeviceToHost);
+        VcudaMemcpy(temp, d_voxels[i], sizeof(TI_Voxel), VcudaMemcpyDeviceToHost);
         read_voxels.push_back(temp);
     }
     for (unsigned i=0;i<d_links.size();i++) {
         TI_Link* temp = (TI_Link*) malloc(sizeof(TI_Link));
-        cudaMemcpy(temp, d_links[i], sizeof(TI_Link), cudaMemcpyDeviceToHost);
+        VcudaMemcpy(temp, d_links[i], sizeof(TI_Link), VcudaMemcpyDeviceToHost);
         read_links.push_back(temp);
     }
 }

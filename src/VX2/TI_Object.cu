@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "TI_Object.h"
+#include "VX3.h"
 
 
 __global__ void kernel(float *A, unsigned num_A) {
@@ -52,10 +53,10 @@ void CTI_Object::Try3() {
         h_data[i]._i = i;
         h_data[i]._d = i+1.5;
     }
-    cudaMalloc(&d_data, size);
-    cudaMemcpy(d_data, h_data, size, cudaMemcpyHostToDevice);
+    VcudaMalloc(&d_data, size);
+    VcudaMemcpy(d_data, h_data, size, VcudaMemcpyHostToDevice);
     kernel2<<<1,1024>>>(d_data, num);
-    cudaMemcpy(h_data, d_data, size, cudaMemcpyDeviceToHost);
+    VcudaMemcpy(h_data, d_data, size, VcudaMemcpyDeviceToHost);
 
     for (unsigned i=0;i<num;i++) {
         printf("%d ", h_data[i]._i);
@@ -67,11 +68,11 @@ void CTI_Object::Try() {
     float* h_A;
     unsigned num_A = 1024;
     unsigned size = num_A*num_A * sizeof(float);
-    cudaMalloc(&d_A, size);
+    VcudaMalloc(&d_A, size);
     kernel<<<1024,1024>>>(d_A, num_A*num_A);
     h_A = (float *)malloc( size );
-    cudaMemcpy(h_A, d_A, sizeof(float), cudaMemcpyDeviceToHost );
-    cudaFree(d_A);
+    VcudaMemcpy(h_A, d_A, sizeof(float), VcudaMemcpyDeviceToHost );
+    VcudaFree(d_A);
     printf("%f, ", h_A[0]);
     printf("\n");
     delete h_A;

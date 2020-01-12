@@ -48,17 +48,27 @@ void VX3_TaskManager::makeTaskPool() {
     printf("Making the folders for tasks: %s\n", fs::canonical(fs::path(PATH_POOL)).c_str());
     printf("\nPlease put your VXA files in \n %s\n and touch a new file in \n %s\n to tell the manager to start simulations.\n", PATH_NEW_TASK, PATH_CALLS);
 }
-void VX3_TaskManager::start() {
+void VX3_TaskManager::start(int how_many_runs) {
 
     makeTaskPool();
+
+    int runs = 0;
+    std::vector<boost::thread> all_threads;
 
     while(1) {
         try {
             if (checkForCalls()) {
-                printf("New call received.\n");
+                runs++;
+                printf("New call (%d) received.\n", runs);
                 fs::path batchFolder = batchVXAFiles();
                 //Start Simulater and pass batchFolder to it
-                boost::thread th1(VX3_SimulationManager(), this, batchFolder);
+                // boost::thread th1(VX3_SimulationManager(), this, batchFolder);
+                all_threads.push_back( boost::thread(VX3_SimulationManager(), this, batchFolder) );
+                // all_threads.back().join();
+                if (how_many_runs>0 && runs>=how_many_runs) {
+                    printf("Task Manager says: My job is done, bye. (Please wait for them to finish.)\n");
+                    break;
+                }
                 printf("Continue watching for new calls.\n");
             } else {
                 //printf("waiting for calls.\n");
@@ -67,5 +77,9 @@ void VX3_TaskManager::start() {
             printf("ERROR: ignored.\n");
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    // Wait for every threads to finish
+    for (auto &t:all_threads) {
+        t.join();
     }
 }

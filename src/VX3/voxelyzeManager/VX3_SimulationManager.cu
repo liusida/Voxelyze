@@ -33,10 +33,12 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     std::vector<VX3_VoxelyzeKernel *> h_d_voxelyze_3;
     int batch_size = 0;
     for (auto &file : fs::directory_iterator( batchFolder) ) { batch_size++; }
-    cudaMalloc((void**)&d_voxelyze_3, batch_size * sizeof(VX3_VoxelyzeKernel));
-
+    
+    VcudaMalloc((void**)&d_voxelyze_3, batch_size * sizeof(VX3_VoxelyzeKernel));
+    
     int i = 0;
     for (auto &file : fs::directory_iterator( batchFolder ) ) {
+        
         CVX_Environment MainEnv;
         CVX_Sim MainSim;
         CVX_Object MainObj;
@@ -48,6 +50,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
         if (!MainSim.Import(NULL, NULL, &err_string)){
             std::cout<<err_string;
         }
+        
         VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx);
         h_d_tmp.DtFrac = MainSim.DtFrac;
         h_d_tmp.StopConditionType = MainSim.StopConditionType;
@@ -59,7 +62,8 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
         h_d_tmp.TempPeriod = MainSim.pEnv->TempPeriod;
         h_d_tmp.currentTemperature = h_d_tmp.TempBase + h_d_tmp.TempAmplitude;
         
-        cudaMemcpy(d_voxelyze_3 + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), cudaMemcpyHostToDevice);
+        VcudaMemcpy(d_voxelyze_3 + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice);
+        
         i++;
     }
 
@@ -69,18 +73,22 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     int numBlocks = (num_tasks + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
         threadsPerBlock = num_tasks;
-    CUDA_Simulation<<<numBlocks,threadsPerBlock>>>(d_voxelyze_3, num_tasks);
-    gpuErrchk(cudaGetLastError());
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+    CUDA_Simulation<<<numBlocks,threadsPerBlock,0,stream>>>(d_voxelyze_3, num_tasks);
     //4. wait
-    cudaDeviceSynchronize();
-    
+    cudaStreamSynchronize(stream);
+    cudaStreamDestroy(stream);
+            
     //5. read result
     //sort and write normCOMdisplacement.Length()
     //norm(current Center of mass - initial CoM / voxSize)
 
     double final_z = 0.0;
     VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
-    cudaMemcpy( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), cudaMemcpyDeviceToHost );
+    
+    VcudaMemcpy( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost );
+    
     //TODO: how to communicate with experiments? files? or other methods?
     printf("\n====[RESULTS for %s]====\n", batchFolder.filename().c_str());
     std::vector< std::pair<double, int> > normAbsoluteDisplacement;
@@ -113,7 +121,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     for (auto p:h_d_voxelyze_3) {
         p->cleanup();
     }
-    cudaFree(d_voxelyze_3);
+    VcudaFree(d_voxelyze_3);
     tm->cleanBatchFolder(batchFolder);
     // delete result_voxelyze_kernel;
 

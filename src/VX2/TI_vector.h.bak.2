@@ -12,7 +12,7 @@ class TI_vector {
 public:
     CUDA_CALLABLE_MEMBER TI_vector<T>() {
         num_main = 0;
-        cudaMalloc()
+        VcudaMalloc()
     }
 
     CUDA_CALLABLE_MEMBER ~TI_vector<T>() {
@@ -33,7 +33,7 @@ public:
         for (unsigned i=0;i<num_main;i++) {
             temp[i] = p[i];
         }
-        cudaMemcpy(main, temp, num_main*sizeof(T), cudaMemcpyHostToDevice);
+        VcudaMemcpy(main, temp, num_main*sizeof(T), VcudaMemcpyHostToDevice);
         delete temp;
         return *this; 
     }

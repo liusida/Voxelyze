@@ -17,19 +17,19 @@ public:
 
     /* Cuda methods */
     __device__ bool doTimeStep(float dt = -1.0f);
-    __device__ float recommendedTimeStep() const;
+    __device__ double recommendedTimeStep();
     __device__ void updateCurrentCenterOfMass();
     __device__ bool StopConditionMet();
     __device__ void updateTemperature();
 
     /* data */
 	double voxSize; //lattice size
-	double currentTime; //current time of the simulation in seconds
-    double OptimalDt;
+	double currentTime = 0.0f; //current time of the simulation in seconds
+    double OptimalDt = 0.0f;
     double DtFrac;
     StopCondition StopConditionType;
     double StopConditionValue;
-    unsigned long CurStepCount;
+    unsigned long CurStepCount = 0.0f;
     
     //Temperature:
 	bool TempEnabled; //overall flag for temperature calculations

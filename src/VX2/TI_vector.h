@@ -2,7 +2,6 @@
 
 #if !defined(TI_VECTOR_H)
 #define TI_VECTOR_H
-
 #include <vector>
 #include "TI_Utils.h"
 
@@ -17,7 +16,7 @@ public:
             main = (T*) malloc(sizeof_chunk*sizeof(T));
             flag = 1;
         #else
-            cudaMalloc( &main , sizeof_chunk*sizeof(T) );
+            VcudaMalloc( &main , sizeof_chunk*sizeof(T) );
             flag = 2;
         #endif
         num_main = 0;
@@ -26,7 +25,7 @@ public:
         #ifdef __CUDA_ARCH__
             delete main;
         #else
-            cudaFree( main );
+            VcudaFree( main );
         #endif
     }
     TI_vector<T>(const std::vector<T>& p) {
@@ -37,7 +36,7 @@ public:
                 debugHost(printf("ERROR")); break; 
             }
         }
-        cudaMalloc( &main , sizeof_chunk*sizeof(T) );
+        VcudaMalloc( &main , sizeof_chunk*sizeof(T) );
         set(p);
     }
 	TI_vector& operator=(const std::vector<T>& p) { return set(p); }
@@ -50,8 +49,8 @@ public:
             }
         }
         if (last_sizeof_chunk!=sizeof_chunk) { //size changed
-            cudaFree( main );
-            cudaMalloc( &main , sizeof_chunk*sizeof(T) );
+            VcudaFree( main );
+            VcudaMalloc( &main , sizeof_chunk*sizeof(T) );
         }
         flag = 2;
         num_main = p.size();
@@ -59,7 +58,7 @@ public:
         for (unsigned i=0;i<num_main;i++) {
             temp[i] = p[i];
         }
-        cudaMemcpy(main, temp, num_main*sizeof(T), cudaMemcpyHostToDevice);
+        VcudaMemcpy(main, temp, num_main*sizeof(T), VcudaMemcpyHostToDevice);
         delete temp;
         return *this; 
     }

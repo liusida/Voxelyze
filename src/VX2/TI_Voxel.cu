@@ -11,10 +11,10 @@ previousDt(p->previousDt) {
 	_voxel = p;
     _kernel = k;
 
-	gpuErrchk(cudaMalloc((void **) &mat, sizeof(TI_MaterialVoxel)));
+	VcudaMalloc((void **) &mat, sizeof(TI_MaterialVoxel));
 	TI_MaterialVoxel temp1(p->mat);
 	
-	gpuErrchk(cudaMemcpy(mat, &temp1, sizeof(TI_MaterialVoxel), cudaMemcpyHostToDevice));
+	VcudaMemcpy(mat, &temp1, sizeof(TI_MaterialVoxel), VcudaMemcpyHostToDevice);
 
 	for (unsigned i=0;i<6;i++) {
 		if (p->links[i]) {
@@ -26,9 +26,9 @@ previousDt(p->previousDt) {
 
 	// mat = new TI_MaterialVoxel(p->mat);
 	if (p->ext) {
-		gpuErrchk(cudaMalloc((void **) &ext, sizeof(TI_External)));
+		VcudaMalloc((void **) &ext, sizeof(TI_External));
 		TI_External temp2(p->ext);
-		gpuErrchk(cudaMemcpy(ext, &temp2, sizeof(TI_External), cudaMemcpyHostToDevice));
+		VcudaMemcpy(ext, &temp2, sizeof(TI_External), VcudaMemcpyHostToDevice);
 	} else {
 		ext = NULL;
 	}

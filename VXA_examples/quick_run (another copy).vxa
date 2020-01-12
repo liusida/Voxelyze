@@ -30,7 +30,7 @@
         </SurfMesh>
         <StopCondition>
         <StopConditionType>2</StopConditionType>
-        <StopConditionValue>5</StopConditionValue>
+        <StopConditionValue>0.5</StopConditionValue>
         <AfterlifeTime>0</AfterlifeTime>
         <MidLifeFreezeTime>0</MidLifeFreezeTime>
         <InitCmTime>1</InitCmTime>

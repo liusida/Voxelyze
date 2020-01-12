@@ -1,60 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
         <VXA Version="1.0">
-        <Simulator>
-<Integration>
-        <Integrator>0</Integrator>
-        <DtFrac>0.9</DtFrac>
-        </Integration>
-        <Damping>
-        <BondDampingZ>1</BondDampingZ>
-        <ColDampingZ>0.8</ColDampingZ>
-        <SlowDampingZ>0.01</SlowDampingZ>
-        </Damping>
-        <Collisions>
-        <SelfColEnabled>1</SelfColEnabled>
-        <ColSystem>3</ColSystem>
-        <CollisionHorizon>2</CollisionHorizon>
-        </Collisions>
-        <Features>
-        <FluidDampEnabled>0</FluidDampEnabled>
-        <PoissonKickBackEnabled>0</PoissonKickBackEnabled>
-        <EnforceLatticeEnabled>0</EnforceLatticeEnabled>
-        </Features>
-        <SurfMesh>
-        <CMesh>
-        <DrawSmooth>1</DrawSmooth>
-        <Vertices/>
-        <Facets/>
-        <Lines/>
-        </CMesh>
-        </SurfMesh>
-        <StopCondition>
-        <StopConditionType>2</StopConditionType>
-        <StopConditionValue>4.4</StopConditionValue>
-        <InitCmTime>0.4</InitCmTime>
-        <ActuationStartTime>0</ActuationStartTime>
-        </StopCondition>
-        <EquilibriumMode>
-        <EquilibriumModeEnabled>0</EquilibriumModeEnabled>
-        </EquilibriumMode>
-        <GA>
-        <WriteFitnessFile>1</WriteFitnessFile>
-        <FitnessFileName>run_1/fitnessFiles/softbotsOutput--id_00018.xml</FitnessFileName>
-        <QhullTmpFile>run_1/../_qhull/tempFiles/qhullInput--id_00018.txt</QhullTmpFile>
-        <CurvaturesTmpFile>run_1/../_qhull/tempFiles/curvatures--id_00018.txt</CurvaturesTmpFile>
-        </GA>
-        <MinTempFact>0.1</MinTempFact>
-        <MaxTempFactChange>1e-05</MaxTempFactChange>
-        <DampEvolvedStiffness>1</DampEvolvedStiffness>
-        <MaxStiffnessChange>10000</MaxStiffnessChange>
-        <MinElasticMod>5000000.0</MinElasticMod>
-        <MaxElasticMod>500000000.0</MaxElasticMod>
-        <ErrorThreshold>0</ErrorThreshold>
-        <ThresholdTime>0</ThresholdTime>
-        <MaxKP>0</MaxKP>
-        <MaxKI>0</MaxKI>
-        <MaxANTIWINDUP>0</MaxANTIWINDUP>
-</Simulator>
+        
 <Environment>
 <Fixed_Regions>
             <NumFixed>0</NumFixed>
