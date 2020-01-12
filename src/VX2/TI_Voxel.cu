@@ -14,7 +14,7 @@ previousDt(p->previousDt) {
 	VcudaMalloc((void **) &mat, sizeof(TI_MaterialVoxel));
 	TI_MaterialVoxel temp1(p->mat);
 	
-	VcudaMemcpy(mat, &temp1, sizeof(TI_MaterialVoxel), VcudaMemcpyHostToDevice);
+	VcudaMemcpyAsync(mat, &temp1, sizeof(TI_MaterialVoxel), VcudaMemcpyHostToDevice, k->stream);
 
 	for (unsigned i=0;i<6;i++) {
 		if (p->links[i]) {
@@ -28,7 +28,7 @@ previousDt(p->previousDt) {
 	if (p->ext) {
 		VcudaMalloc((void **) &ext, sizeof(TI_External));
 		TI_External temp2(p->ext);
-		VcudaMemcpy(ext, &temp2, sizeof(TI_External), VcudaMemcpyHostToDevice);
+		VcudaMemcpyAsync(ext, &temp2, sizeof(TI_External), VcudaMemcpyHostToDevice, k->stream);
 	} else {
 		ext = NULL;
 	}

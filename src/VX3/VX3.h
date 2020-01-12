@@ -24,6 +24,7 @@
         #define CUDA_ERROR_CHECK(ans) { CUDA_ERROR_CHECK_OUTPUT((ans), __FILE__, __LINE__); }
     #endif
     #define VcudaMemcpy(a,b,c,d)  {CUDA_ERROR_CHECK(cudaMemcpy(a,b,c,d))}
+    #define VcudaMemcpyAsync(a,b,c,d,e)  {CUDA_ERROR_CHECK(cudaMemcpyAsync(a,b,c,d,e))}
     #define VcudaMalloc(a,b) {CUDA_ERROR_CHECK(cudaMalloc(a,b))}
     #define VcudaFree(a) {CUDA_ERROR_CHECK(cudaFree(a))}
     #define VcudaMemcpyHostToDevice cudaMemcpyHostToDevice

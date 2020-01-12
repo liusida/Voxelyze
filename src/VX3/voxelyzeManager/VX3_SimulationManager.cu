@@ -25,7 +25,7 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
     }
 }
 
-void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder) {
+void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder, cudaStream_t stream) {
     if (fs::is_empty(batchFolder)) return;
     //1. read every VXA files
     std::vector<std::string> filenames;
@@ -51,7 +51,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
             std::cout<<err_string;
         }
         
-        VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx);
+        VX3_VoxelyzeKernel h_d_tmp(&MainSim.Vx, stream);
         h_d_tmp.DtFrac = MainSim.DtFrac;
         h_d_tmp.StopConditionType = MainSim.StopConditionType;
         h_d_tmp.StopConditionValue = MainSim.StopConditionValue;
@@ -62,7 +62,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
         h_d_tmp.TempPeriod = MainSim.pEnv->TempPeriod;
         h_d_tmp.currentTemperature = h_d_tmp.TempBase + h_d_tmp.TempAmplitude;
         
-        VcudaMemcpy(d_voxelyze_3 + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice);
+        VcudaMemcpyAsync(d_voxelyze_3 + i, &h_d_tmp, sizeof(VX3_VoxelyzeKernel), VcudaMemcpyHostToDevice, stream);
         
         i++;
     }
@@ -73,13 +73,10 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     int numBlocks = (num_tasks + threadsPerBlock - 1) / threadsPerBlock;
     if (numBlocks == 1)
         threadsPerBlock = num_tasks;
-    cudaStream_t stream;
-    cudaStreamCreate(&stream);
     CUDA_Simulation<<<numBlocks,threadsPerBlock,0,stream>>>(d_voxelyze_3, num_tasks);
     //4. wait
     cudaStreamSynchronize(stream);
-    cudaStreamDestroy(stream);
-            
+
     //5. read result
     //sort and write normCOMdisplacement.Length()
     //norm(current Center of mass - initial CoM / voxSize)
@@ -87,7 +84,7 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     double final_z = 0.0;
     VX3_VoxelyzeKernel* result_voxelyze_kernel = (VX3_VoxelyzeKernel *)malloc(num_tasks * sizeof(VX3_VoxelyzeKernel));
     
-    VcudaMemcpy( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost );
+    VcudaMemcpyAsync( result_voxelyze_kernel, d_voxelyze_3, num_tasks * sizeof(VX3_VoxelyzeKernel), VcudaMemcpyDeviceToHost, stream );
     
     //TODO: how to communicate with experiments? files? or other methods?
     printf("\n====[RESULTS for %s]====\n", batchFolder.filename().c_str());

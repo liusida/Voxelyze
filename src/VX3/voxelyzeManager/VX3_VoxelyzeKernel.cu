@@ -6,8 +6,10 @@ __global__ void gpu_update_temperature(TI_Voxel* voxels, int num, double current
 
 /* Host methods */
 
-VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In)
+VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream)
 {
+    stream = In_stream;
+
     voxSize = In->voxSize;
     
     num_d_linkMats = In->linkMats.size();
@@ -16,7 +18,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In)
         int i = 0;
         for (auto mat:In->linkMats) {
             TI_MaterialLink tmp_linkMat( mat );
-            VcudaMemcpy( d_linkMats+i, &tmp_linkMat, sizeof(TI_MaterialLink), VcudaMemcpyHostToDevice );
+            VcudaMemcpyAsync( d_linkMats+i, &tmp_linkMat, sizeof(TI_MaterialLink), VcudaMemcpyHostToDevice, stream );
             h_linkMats.push_back( mat );
             i++;
         }
@@ -32,20 +34,20 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In)
     VcudaMalloc( (void **)&d_links, num_d_links * sizeof(TI_Link));
     for (int i=0;i<num_d_links;i++) {
         TI_Link tmp_link( In->linksList[i], this );
-        VcudaMemcpy( d_links+i, &tmp_link, sizeof(TI_Link), VcudaMemcpyHostToDevice );
+        VcudaMemcpyAsync( d_links+i, &tmp_link, sizeof(TI_Link), VcudaMemcpyHostToDevice, stream );
         h_links.push_back( In->linksList[i] );
     }
 
     for (int i=0;i<num_d_voxels;i++) {
         //set values for GPU memory space
         TI_Voxel tmp_voxel(In->voxelsList[i], this);
-        VcudaMemcpy(d_voxels+i, &tmp_voxel, sizeof(TI_Voxel), VcudaMemcpyHostToDevice);
+        VcudaMemcpyAsync(d_voxels+i, &tmp_voxel, sizeof(TI_Voxel), VcudaMemcpyHostToDevice, stream);
     }
 
     VcudaMalloc((void**)&d_collisionsStale, sizeof(bool));
 
     VcudaMalloc((void **)&d_collisions, sizeof(TI_vector<TI_Collision *>));
-    VcudaMemcpy(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyHostToDevice);
+    VcudaMemcpyAsync(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyHostToDevice, stream);
 
 }
 

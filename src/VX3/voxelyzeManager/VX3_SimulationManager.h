@@ -20,7 +20,7 @@ public:
     VX3_SimulationManager() = default;
     
     //Overload operator to start thread
-    void operator()(VX3_TaskManager* tm, fs::path batchFolder);
+    void operator()(VX3_TaskManager* tm, fs::path batchFolder, cudaStream_t stream);
 
 
 };

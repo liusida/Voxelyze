@@ -41,46 +41,46 @@ target_compile_options(voxelyzeManager PUBLIC $<$<COMPILE_LANGUAGE:CUDA>: -arch=
 list(APPEND CMAKE_CUDA_FLAGS "-gencode=arch=compute_60,code=sm_60")
 
 
-# #for gtest
-# ################################
-# # Testing
-# ################################
-# option(test "Build all tests." ON) # Makes boolean 'test' available.
-# if (test)
-#   if (APPLE)
-#     add_definitions(-DGTEST_USE_OWN_TR1_TUPLE)
-#     add_definitions(-D__GLIBCXX__)
-#   endif (APPLE)
+#for gtest
+################################
+# Testing
+################################
+option(test "Build all tests." ON) # Makes boolean 'test' available.
+if (test)
+  if (APPLE)
+    add_definitions(-DGTEST_USE_OWN_TR1_TUPLE)
+    add_definitions(-D__GLIBCXX__)
+  endif (APPLE)
 
-#   # This adds another subdirectory, which has 'project(gtest)'.
-#   add_subdirectory(test/googletest)
+  # This adds another subdirectory, which has 'project(gtest)'.
+  add_subdirectory(test/googletest)
 
-#   enable_testing()
+  enable_testing()
 
-#   # Include the gtest library. gtest_SOURCE_DIR is available due to
-#   # 'project(gtest)' above.
-#   include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+  # Include the gtest library. gtest_SOURCE_DIR is available due to
+  # 'project(gtest)' above.
+  include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-#   ##############
-#   # Unit Tests
-#   ##############
-#   set(TEST_DIR test/testCase)
-#   file(GLOB TEST_FILES ${TEST_DIR}/*.c*)
-#   add_executable(runUnitTests ${TEST_FILES})
+  ##############
+  # Unit Tests
+  ##############
+  set(TEST_DIR test/testCase)
+  file(GLOB TEST_FILES ${TEST_DIR}/test_*.c*)
+  add_executable(runUnitTests ${TEST_FILES})
 
-#   # Standard linking to gtest stuff.
-#   target_link_libraries(runUnitTests gtest gtest_main)
+  # Standard linking to gtest stuff.
+  target_link_libraries(runUnitTests gtest gtest_main)
 
-#   # Extra linking for the project.
-#   target_link_libraries(runUnitTests voxelyze.3.0)
+  # Extra linking for the project.
+  target_link_libraries(runUnitTests voxelyze.3.0)
 
-#   # This is so you can do 'make test' to see all your tests run, instead of
-#   # manually running the executable runUnitTests to see those specific tests.
-#   add_test(NAME that-test-I-made COMMAND runUnitTests)
+  # This is so you can do 'make test' to see all your tests run, instead of
+  # manually running the executable runUnitTests to see those specific tests.
+  add_test(NAME that-test-I-made COMMAND runUnitTests)
 
-#   # You can also omit NAME and COMMAND. The second argument could be some other
-#   # test executable.
-#   add_test(that-other-test-I-made runUnitTests)
-# endif()
+  # You can also omit NAME and COMMAND. The second argument could be some other
+  # test executable.
+  add_test(that-other-test-I-made runUnitTests)
+endif()
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)

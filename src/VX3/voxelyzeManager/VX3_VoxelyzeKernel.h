@@ -11,7 +11,7 @@ class VX3_VoxelyzeKernel
 {   
 public:
     /* Host methods */
-    VX3_VoxelyzeKernel(CVoxelyze* In);
+    VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream);
     void cleanup();
     TI_MaterialLink * getMaterialLink(CVX_MaterialLink* vx_mats);
 
@@ -55,6 +55,8 @@ public:
     TI_vector<TI_Collision *>* d_collisions;
     TI_vector<TI_Collision *> h_collisions;
 
+    /* CUDA Stream */
+    cudaStream_t stream;
 };
 
 
