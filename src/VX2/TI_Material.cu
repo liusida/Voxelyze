@@ -3,7 +3,7 @@
 TI_Material::TI_Material( CVX_Material* p ):
 linear(p->linear), E(p->E), sigmaYield(p->sigmaYield), sigmaFail(p->sigmaFail),
 epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), 
-strainData(p->strainData), stressData(p->stressData),
+hd_strainData(p->strainData), hd_stressData(p->stressData), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
 nu(p->nu),rho(p->rho),
 alphaCTE(p->alphaCTE), muStatic(p->muStatic), muKinetic(p->muKinetic),
 zetaInternal(p->zetaInternal), zetaGlobal(p->zetaGlobal), zetaCollision(p->zetaCollision),
@@ -34,8 +34,10 @@ CUDA_DEVICE TI_Material& TI_Material::operator=(const TI_Material& vIn)
 	sigmaFail = vIn.sigmaFail;
 	epsilonYield = vIn.epsilonYield;
 	epsilonFail = vIn.epsilonFail;
-	strainData = vIn.strainData;
+	d_strainData = vIn.d_strainData;
+	// hd_strainData = vIn.hd_strainData;
 	stressData = vIn.stressData;
+	d_stressData = vIn.d_stressData;
 	nu = vIn.nu;
 	rho = vIn.rho;
 	alphaCTE = vIn.alphaCTE;
@@ -75,7 +77,7 @@ CUDA_DEVICE float TI_Material::stress(float strain, float transverseStrainSum, b
 {
 	//reference: http://www.colorado.edu/engineering/CAS/courses.d/Structures.d/IAST.Lect05.d/IAST.Lect05.pdf page 10
 	if (isFailed(strain)) return 0.0f; //if a failure point is set and exceeded, we've broken!
-	if (strain <= strainData[1] || linear || forceLinear){ //for compression/first segment and linear materials (forced or otherwise), simple calculation
+	if (strain <= d_strainData[1] || linear || forceLinear){ //for compression/first segment and linear materials (forced or otherwise), simple calculation
 		if (nu==0.0f) return E*strain;
 		else return _eHat*((1-nu)*strain + nu*transverseStrainSum); 
 //		else return eHat()*((1-nu)*strain + nu*transverseStrainSum); 
@@ -83,12 +85,12 @@ CUDA_DEVICE float TI_Material::stress(float strain, float transverseStrainSum, b
 	//the non-linear feature with non-zero poissons ratio is currently experimental
 	int DataCount = modelDataPoints();
 	for (int i=2; i<DataCount; i++){ //go through each segment in the material model (skipping the first segment because it has already been handled.
-		if (strain <= strainData[i] || i==DataCount-1){ //if in the segment ending with this point (or if this is the last point extrapolate out) 
-			float Perc = (strain-strainData[i-1])/(strainData[i]-strainData[i-1]);
-			float basicStress = stressData[i-1] + Perc*(stressData[i]-stressData[i-1]);
+		if (strain <= d_strainData[i] || i==DataCount-1){ //if in the segment ending with this point (or if this is the last point extrapolate out) 
+			float Perc = (strain-d_strainData[i-1])/(d_strainData[i]-d_strainData[i-1]);
+			float basicStress = d_stressData[i-1] + Perc*(d_stressData[i]-d_stressData[i-1]);
 			if (nu==0.0f) return basicStress;
 			else { //accounting for volumetric effects
-				float modulus = (stressData[i]-stressData[i-1])/(strainData[i]-strainData[i-1]);
+				float modulus = (d_stressData[i]-d_stressData[i-1])/(d_strainData[i]-d_strainData[i-1]);
 				float modulusHat = modulus/((1-2*nu)*(1+nu));
 				float effectiveStrain = basicStress/modulus; //this is the strain at which a simple linear stress strain line would hit this point at the definied modulus
 				float effectiveTransverseStrainSum = transverseStrainSum*(effectiveStrain/strain);
@@ -101,13 +103,13 @@ CUDA_DEVICE float TI_Material::stress(float strain, float transverseStrainSum, b
 
 CUDA_DEVICE float TI_Material::strain(float stress)
 {
-	if (stress <= stressData[1] || linear) return stress/E; //for compression/first segment and linear materials (forced or otherwise), simple calculation
+	if (stress <= d_stressData[1] || linear) return stress/E; //for compression/first segment and linear materials (forced or otherwise), simple calculation
 
 	int DataCount = modelDataPoints();
 	for (int i=2; i<DataCount; i++){ //go through each segment in the material model (skipping the first segment because it has already been handled.
-		if (stress <= stressData[i] || i==DataCount-1){ //if in the segment ending with this point (or if this is the last point extrapolate out) 
-			float Perc = (stress-stressData[i-1])/(stressData[i]-stressData[i-1]);
-			return strainData[i-1] + Perc*(strainData[i]-strainData[i-1]);
+		if (stress <= d_stressData[i] || i==DataCount-1){ //if in the segment ending with this point (or if this is the last point extrapolate out) 
+			float Perc = (stress-d_stressData[i-1])/(d_stressData[i]-d_stressData[i-1]);
+			return d_strainData[i-1] + Perc*(d_strainData[i]-d_strainData[i-1]);
 		}
 	}
     return 0.0f;
@@ -117,11 +119,11 @@ CUDA_DEVICE float TI_Material::strain(float stress)
 CUDA_DEVICE float TI_Material::modulus(float strain)
 {
 	if (isFailed(strain)) return 0.0f; //if a failure point is set and exceeded, we've broken!
-	if (strain <= strainData[1] || linear) return E; //for compression/first segment and linear materials, simple calculation
+	if (strain <= d_strainData[1] || linear) return E; //for compression/first segment and linear materials, simple calculation
 
 	int DataCount = modelDataPoints();
 	for (int i=2; i<DataCount; i++){ //go through each segment in the material model (skipping the first segment because it has already been handled.
-		if (strain <= strainData[i] || i==DataCount-1) return (stressData[i]-stressData[i-1])/(strainData[i]-strainData[i-1]); //if in the segment ending with this point
+		if (strain <= d_strainData[i] || i==DataCount-1) return (d_stressData[i]-d_stressData[i-1])/(d_strainData[i]-d_strainData[i-1]); //if in the segment ending with this point
 	}
 	return 0.0f;
 }
@@ -266,12 +268,12 @@ CUDA_DEVICE bool TI_Material::setModelLinear(float youngsModulus, float failureS
 	if (tmpfailureStress == -1) tmpfailureStress = 1000000;
 	float tmpfailStrain = tmpfailureStress/youngsModulus;
 
-	strainData.clear();
-	stressData.clear();
-	strainData.push_back(0); //add in the zero data point (required always)
-	stressData.push_back(0);
-	strainData.push_back(tmpfailStrain);
-	stressData.push_back(tmpfailureStress);
+	d_strainData.clear();
+	d_stressData.clear();
+	d_strainData.push_back(0.0f); //add in the zero data point (required always)
+	d_stressData.push_back(0);
+	d_strainData.push_back(tmpfailStrain);
+	d_stressData.push_back(tmpfailureStress);
 
 	linear=true;
 	E=youngsModulus;
@@ -312,15 +314,15 @@ CUDA_DEVICE bool TI_Material::setModelBilinear(float youngsModulus, float plasti
 	float tB = yieldStress-tM*yieldStrain; //y-mx=b
 	float tmpfailStrain = (tmpfailureStress-tB)/tM; // (y-b)/m = x
 
-	strainData.clear();
-	strainData.push_back(0); //add in the zero data point (required always)
-	strainData.push_back(yieldStrain);
-	strainData.push_back(tmpfailStrain);
+	d_strainData.clear();
+	d_strainData.push_back(0.0f); //add in the zero data point (required always)
+	d_strainData.push_back(yieldStrain);
+	d_strainData.push_back(tmpfailStrain);
 
-	stressData.clear();
-	stressData.push_back(0);
-	stressData.push_back(yieldStress);
-	stressData.push_back(tmpfailureStress);
+	d_stressData.clear();
+	d_stressData.push_back(0);
+	d_stressData.push_back(yieldStress);
+	d_stressData.push_back(tmpfailureStress);
 
 	linear = false;
 	E=youngsModulus;
@@ -341,12 +343,12 @@ CUDA_DEVICE bool TI_Material::setYieldFromData(float percentStrainOffset)
 	float oM = E; //the offset line slope (y=Mx+B)
 	float oB = (-percentStrainOffset/100*oM); //offset line intercept (100 factor turns percent into absolute
 
-	int dataPoints = strainData.size()-1;
+	int dataPoints = d_strainData.size()-1;
 	for (int i=1; i<dataPoints-1; i++){
-		float x1=strainData[i];
-		float x2=strainData[i+1];
-		float y1=stressData[i];
-		float y2=stressData[i+1];
+		float x1=d_strainData[i];
+		float x2=d_strainData[i+1];
+		float y1=d_stressData[i];
+		float y2=d_stressData[i+1];
 
 		float tM = (y2-y1)/(x2-x1); //temporary slope
 		float tB = y1-tM*x1; //temporary intercept
@@ -428,4 +430,25 @@ CUDA_DEVICE bool TI_Material::updateDerived()
 		dependentMaterials[i]->updateAll();
 	}
 	return true;
+}
+
+CUDA_DEVICE void TI_Material::syncVectors()
+{
+	//hd_strainData -> d_strainData
+	d_strainData.clear();
+	d_strainData.push_back(0.0f);
+
+	for (unsigned i=0;i<hd_strainData.size();i++) {
+		d_strainData.push_back(hd_strainData[i]);
+	}
+	
+	//hd_stressData -> d_stressData
+	d_stressData.clear();
+	d_stressData.push_back(0.0f);
+
+	for (unsigned i=0;i<hd_stressData.size();i++) {
+		d_stressData.push_back(hd_stressData[i]);
+	}
+
+	
 }

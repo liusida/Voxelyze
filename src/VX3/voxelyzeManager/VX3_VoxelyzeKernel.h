@@ -21,6 +21,7 @@ public:
     __device__ void updateCurrentCenterOfMass();
     __device__ bool StopConditionMet();
     __device__ void updateTemperature();
+    __device__ void syncVectors();
 
     /* data */
 	double voxSize; //lattice size

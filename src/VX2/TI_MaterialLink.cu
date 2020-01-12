@@ -72,14 +72,14 @@ CUDA_DEVICE bool TI_MaterialLink::updateAll()
 
 		//step up through ascending strains data points (could alternate randomly between vox1Mat and vox2Mat points
 		int dataIt1 = 1, dataIt2 = 1; //iterators through each data point of the model
-		while (dataIt1 < (int)vox1Mat->strainData.size() && dataIt2 < (int)vox2Mat->strainData.size()){
+		while (dataIt1 < (int)vox1Mat->d_strainData.size() && dataIt2 < (int)vox2Mat->d_strainData.size()){
 			float strain = FLT_MAX; //strain for the next data point is the smaller of the two possible next strain points (but we have to make sure we don't access off the end of one of the arrays)
-			if (dataIt1 < (int)vox1Mat->strainData.size()) strain = vox1Mat->strainData[dataIt1];
-			if (dataIt2 < (int)vox2Mat->strainData.size() && vox2Mat->strainData[dataIt2]<strain) strain = vox2Mat->strainData[dataIt2];
+			if (dataIt1 < (int)vox1Mat->d_strainData.size()) strain = vox1Mat->d_strainData[dataIt1];
+			if (dataIt2 < (int)vox2Mat->d_strainData.size() && vox2Mat->d_strainData[dataIt2]<strain) strain = vox2Mat->d_strainData[dataIt2];
 			else assert(strain != FLT_MAX); //this should never happen
 
-			if (strain == vox1Mat->strainData[dataIt1]) dataIt1++;
-			if (strain == vox2Mat->strainData[dataIt2]) dataIt2++;
+			if (strain == vox1Mat->d_strainData[dataIt1]) dataIt1++;
+			if (strain == vox2Mat->d_strainData[dataIt2]) dataIt2++;
 
 
 			float modulus1 = vox1Mat->modulus(strain-FLT_EPSILON);

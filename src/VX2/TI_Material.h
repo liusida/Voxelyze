@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "VX3_vector.h"
 
 #include "TI_Utils.h"
 #include "VX_Material.h"
@@ -48,8 +49,8 @@ public:
 	CUDA_DEVICE float youngsModulus() const {return E;} //!< Returns Youngs modulus in Pa.
 	CUDA_DEVICE float yieldStress() const {return sigmaYield;} //!<Returns the yield stress in Pa or -1 if unspecified.
 	CUDA_DEVICE float failureStress() const {return sigmaFail;} //!<Returns the failure stress in Pa or -1 if unspecified.
-	CUDA_DEVICE int modelDataPoints() {return strainData.size();} //!< Returns the number of data points in the current material model data arrays.
-	CUDA_DEVICE const float* modelDataStrain() {return &strainData[0];} //!< Returns a pointer to the first strain value data point in a continuous array. The number of values can be determined from modelDataPoints(). The assumed first value of 0 is included.
+	CUDA_DEVICE int modelDataPoints() {return d_strainData.size();} //!< Returns the number of data points in the current material model data arrays.
+	CUDA_DEVICE const float* modelDataStrain() {return &(d_strainData[0]);} //!< Returns a pointer to the first strain value data point in a continuous array. The number of values can be determined from modelDataPoints(). The assumed first value of 0 is included.
 	CUDA_DEVICE const float* modelDataStress() {return &stressData[0];} //!< Returns a pointer to the first stress value data point in a continuous array. The number of values can be determined from modelDataPoints(). The assumed first value of 0 is included.
 
 	CUDA_DEVICE void setPoissonsRatio(float poissonsRatio); //!< Defines Poisson's ratio for the material. @param [in] poissonsRatio Desired Poisson's ratio [0, 0.5).
@@ -93,6 +94,9 @@ public:
 	CUDA_DEVICE bool setYieldFromData(float percentStrainOffset=0.2); //!< Sets sigmaYield and epsilonYield assuming strainData, stressData, E, and failStrain are set correctly.
 	CUDA_DEVICE float strain(float stress); //!< Returns a simple reverse lookup of the first strain that yields this stress from data point lookup.
 
+	//VX3_vector
+	CUDA_DEVICE void syncVectors();
+
 
 
 /* data */
@@ -111,7 +115,12 @@ public:
 	float epsilonYield; //!< Yield strain
 	float epsilonFail; //!< Failure strain
 	TI_vector<float> strainData; //!< strain data points
+	VX3_hdVector<float> hd_strainData;
+	VX3_dVector<float> d_strainData;
 	TI_vector<float> stressData; //!< stress data points
+	VX3_hdVector<float> hd_stressData;
+	VX3_dVector<float> d_stressData;
+
 	float nu; //!< Poissonss Ratio
 	float rho; //!< Density in Kg/m^3
 	float alphaCTE; //!< Coefficient of thermal expansion (CTE)

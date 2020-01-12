@@ -72,6 +72,11 @@ TI_MaterialLink * VX3_VoxelyzeKernel::getMaterialLink(CVX_MaterialLink* vx_mats)
 
 /* Cuda methods : cannot use any CVX_xxx, and no std::, no boost::, and no filesystem. */
 
+__device__ void VX3_VoxelyzeKernel::syncVectors() {
+    for (int i=0;i<num_d_linkMats;i++) {
+        d_linkMats[i].syncVectors();
+    }
+}
 __device__ bool VX3_VoxelyzeKernel::StopConditionMet(void) //have we met the stop condition yet?
 {
     if (StopConditionType!=SC_MAX_SIM_TIME) {
