@@ -12,7 +12,7 @@ previousDt(p->previousDt) {
     _kernel = k;
 
 	VcudaMalloc((void **) &mat, sizeof(TI_MaterialVoxel));
-	TI_MaterialVoxel temp1(p->mat);
+	TI_MaterialVoxel temp1(p->mat, k->stream);
 	
 	VcudaMemcpyAsync(mat, &temp1, sizeof(TI_MaterialVoxel), VcudaMemcpyHostToDevice, k->stream);
 
@@ -34,17 +34,17 @@ previousDt(p->previousDt) {
 	}
 
 	//lastColWatchPosition(*p->lastColWatchPosition),colWatch(p->colWatch), nearby(p->nearby)
-	if (p->lastColWatchPosition) {
-		lastColWatchPosition = (*p->lastColWatchPosition);
-	}
-	if (p->colWatch) {
-		//colWatch = (*p->colWatch);
+	// if (p->lastColWatchPosition) {
+	// 	lastColWatchPosition = (*p->lastColWatchPosition);
+	// }
+	// if (p->colWatch) {
+	// 	//colWatch = (*p->colWatch);
 		
-	}
-	if (p->nearby) {
-		//nearby = (*p->nearby);
+	// }
+	// if (p->nearby) {
+	// 	//nearby = (*p->nearby);
 		
-	}
+	// }
 }
 
 TI_Link* TI_Voxel::getDevPtrFromHostPtr(CVX_Link* p) {
@@ -255,11 +255,12 @@ CUDA_DEVICE TI_Vec3D<double> TI_Voxel::force()
 	totalForce -= velocity()*mat->globalDampingTranslateC(); //global damping f-cv
 	totalForce.z += mat->gravityForce(); //gravity, according to f=mg
 	
-	if (isCollisionsEnabled()){
-		for (int i=0;i<colWatch.size();i++){
-			totalForce -= colWatch[i]->contactForce(this);
-		}
-	}
+	//no collision yet
+	// if (isCollisionsEnabled()){
+	// 	for (int i=0;i<colWatch.size();i++){
+	// 		totalForce -= colWatch[i]->contactForce(this);
+	// 	}
+	// }
 	return totalForce;
 }
 
@@ -398,49 +399,50 @@ CUDA_DEVICE void TI_Voxel::enableCollisions(bool enabled, float watchRadius) {
 
 
 CUDA_DEVICE void TI_Voxel::generateNearby(int linkDepth, int gindex, bool surfaceOnly){
-	TI_vector<TI_Voxel*> allNearby;
-	allNearby.push_back(this);
-	int iCurrent = 0;
-	for (int k=0; k<linkDepth; k++){
-		int iPassEnd = allNearby.size();
+	assert(false); //not used.
+	// TI_vector<TI_Voxel*> allNearby;
+	// allNearby.push_back(this);
+	// int iCurrent = 0;
+	// for (int k=0; k<linkDepth; k++){
+	// 	int iPassEnd = allNearby.size();
 
-		while (iCurrent != iPassEnd){
-			TI_Voxel* pV = allNearby[iCurrent++];
+	// 	while (iCurrent != iPassEnd){
+	// 		TI_Voxel* pV = allNearby[iCurrent++];
 			
-			for (int i=0; i<6; i++){
-				printf("pV %p gindex %d \n", pV, gindex);
-				TI_Voxel* pV2 = pV->adjacentVoxel((linkDirection)i);
-				//if (pV2 && std::find(allNearby.begin(), allNearby.end(), pV2) == allNearby.end()) allNearby.push_back(pV2);
-				if (pV2) {
-					bool finded = false;
-					for (unsigned j=0;j<allNearby.size();j++) {
-						if (pV2==allNearby[j]) {
-							finded = true;
-							break;
-						}
-					}
-					if (!finded) {
-						if (gindex==1) {
-							printf("pV2 %p\n", pV2);
-						}
-							allNearby.push_back(pV2, true);
-						if (gindex==1) {
-							for (int k=0;k<allNearby.size();k++)
-								printf("gindex %d (%p)allNearby[%d] %p\n", gindex, &allNearby, k, allNearby[k]);
-						}
-						else
-							allNearby.push_back(pV2, false);
-					}
-				}
+	// 		for (int i=0; i<6; i++){
+	// 			printf("pV %p gindex %d \n", pV, gindex);
+	// 			TI_Voxel* pV2 = pV->adjacentVoxel((linkDirection)i);
+	// 			//if (pV2 && std::find(allNearby.begin(), allNearby.end(), pV2) == allNearby.end()) allNearby.push_back(pV2);
+	// 			if (pV2) {
+	// 				bool finded = false;
+	// 				for (unsigned j=0;j<allNearby.size();j++) {
+	// 					if (pV2==allNearby[j]) {
+	// 						finded = true;
+	// 						break;
+	// 					}
+	// 				}
+	// 				if (!finded) {
+	// 					if (gindex==1) {
+	// 						printf("pV2 %p\n", pV2);
+	// 					}
+	// 						allNearby.push_back(pV2, true);
+	// 					if (gindex==1) {
+	// 						for (int k=0;k<allNearby.size();k++)
+	// 							printf("gindex %d (%p)allNearby[%d] %p\n", gindex, &allNearby, k, allNearby[k]);
+	// 					}
+	// 					else
+	// 						allNearby.push_back(pV2, false);
+	// 				}
+	// 			}
 
-			}
-		}
-	}
-	printf("ok.\n");
+	// 		}
+	// 	}
+	// }
+	// printf("ok.\n");
 
-	nearby.clear();
-	for (unsigned i=0;i<allNearby.size();i++) {
-		TI_Voxel* pV = allNearby[i];
-		if (pV->isSurface() && pV != this) nearby.push_back(pV);		
-	}
+	// nearby.clear();
+	// for (unsigned i=0;i<allNearby.size();i++) {
+	// 	TI_Voxel* pV = allNearby[i];
+	// 	if (pV->isSurface() && pV != this) nearby.push_back(pV);		
+	// }
 }

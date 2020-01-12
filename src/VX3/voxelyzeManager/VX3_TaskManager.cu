@@ -55,7 +55,7 @@ void VX3_TaskManager::start(int how_many_runs) {
     int runs = 0;
     std::vector<boost::thread> all_threads;
     // Initialize the streams
-    static const int NUM_STREAMS = 2;
+    static const int NUM_STREAMS = 10;
     cudaStream_t stream[NUM_STREAMS];
     for (int i = 0; i < NUM_STREAMS; i++) {
         cudaStreamCreate(stream + i);

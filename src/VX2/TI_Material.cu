@@ -1,9 +1,9 @@
 #include "TI_Material.h"
 
-TI_Material::TI_Material( CVX_Material* p ):
+TI_Material::TI_Material( CVX_Material* p, cudaStream_t stream ):
 linear(p->linear), E(p->E), sigmaYield(p->sigmaYield), sigmaFail(p->sigmaFail),
 epsilonYield(p->epsilonYield), epsilonFail(p->epsilonFail), 
-hd_strainData(p->strainData), hd_stressData(p->stressData), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
+hd_strainData(p->strainData, stream), hd_stressData(p->stressData, stream), //hd_vector init in host, used for passing data to kernel. With syncVector() function, we use d_vector in kernel.
 nu(p->nu),rho(p->rho),
 alphaCTE(p->alphaCTE), muStatic(p->muStatic), muKinetic(p->muKinetic),
 zetaInternal(p->zetaInternal), zetaGlobal(p->zetaGlobal), zetaCollision(p->zetaCollision),
@@ -35,8 +35,7 @@ CUDA_DEVICE TI_Material& TI_Material::operator=(const TI_Material& vIn)
 	epsilonYield = vIn.epsilonYield;
 	epsilonFail = vIn.epsilonFail;
 	d_strainData = vIn.d_strainData;
-	// hd_strainData = vIn.hd_strainData;
-	stressData = vIn.stressData;
+	// hd_strainData = vIn.hd_strainData; //hd is only used for passing data to kernel. so no need to get the value.
 	d_stressData = vIn.d_stressData;
 	nu = vIn.nu;
 	rho = vIn.rho;
@@ -185,69 +184,70 @@ Special cases:
 */
 CUDA_DEVICE bool TI_Material::setModel(int dataPointCount, float* pStrainValues, float* pStressValues)
 {
-	//Pre-checks
-	if (*pStrainValues==0 && *pStressValues==0) { //if first data point is 0,0, ignore it
-		pStrainValues++; //advance the pointers...
-		pStressValues++;
-		dataPointCount--; //decrement the count
-	}
-	if (dataPointCount<=0){
-		//error = "Not enough data points";
-		return false;
-	}
-	if (*pStrainValues<=0 || *pStressValues<=0){
-		//error = "First stress and strain data points negative or zero";
-		return false; 
-	}
+	assert(false); //not used.
+	// //Pre-checks
+	// if (*pStrainValues==0 && *pStressValues==0) { //if first data point is 0,0, ignore it
+	// 	pStrainValues++; //advance the pointers...
+	// 	pStressValues++;
+	// 	dataPointCount--; //decrement the count
+	// }
+	// if (dataPointCount<=0){
+	// 	//error = "Not enough data points";
+	// 	return false;
+	// }
+	// if (*pStrainValues<=0 || *pStressValues<=0){
+	// 	//error = "First stress and strain data points negative or zero";
+	// 	return false; 
+	// }
 
-	//Copy the data into something more usable (and check for monotonically increasing)
-	TI_vector<float> tmpStrainData;
-	TI_vector<float> tmpStressData;
-	tmpStrainData.push_back(0); //add in the zero data point (required always)
-	tmpStressData.push_back(0);
-	float sweepStrain = 0.0f, sweepStress = 0.0f;
-	for (int i=0; i<dataPointCount; i++){
-		float thisStrain = *(pStrainValues+i); //grab the values
-		float thisStress = *(pStressValues+i);
+	// //Copy the data into something more usable (and check for monotonically increasing)
+	// TI_vector<float> tmpStrainData;
+	// TI_vector<float> tmpStressData;
+	// tmpStrainData.push_back(0); //add in the zero data point (required always)
+	// tmpStressData.push_back(0);
+	// float sweepStrain = 0.0f, sweepStress = 0.0f;
+	// for (int i=0; i<dataPointCount; i++){
+	// 	float thisStrain = *(pStrainValues+i); //grab the values
+	// 	float thisStress = *(pStressValues+i);
 
-		if (thisStrain <= sweepStrain){
-			//error = "Out of order strain data";
-			return false;
-		}
+	// 	if (thisStrain <= sweepStrain){
+	// 		//error = "Out of order strain data";
+	// 		return false;
+	// 	}
 
-		if (thisStress <= sweepStress){
-			//error = "Stress data is not monotonically increasing";
-		}
+	// 	if (thisStress <= sweepStress){
+	// 		//error = "Stress data is not monotonically increasing";
+	// 	}
 
-		if (i>0 && (thisStress-sweepStress)/(thisStrain-sweepStrain) > tmpStressData[0]/tmpStrainData[0]){
-			//error = "Slope of stress/strain curve should never exceed that of the first line segment (youngs modulus)";
-			return false;
-		}
+	// 	if (i>0 && (thisStress-sweepStress)/(thisStrain-sweepStrain) > tmpStressData[0]/tmpStrainData[0]){
+	// 		//error = "Slope of stress/strain curve should never exceed that of the first line segment (youngs modulus)";
+	// 		return false;
+	// 	}
 
-		sweepStrain = thisStrain;
-		sweepStress = thisStress;
+	// 	sweepStrain = thisStrain;
+	// 	sweepStress = thisStress;
 
-		tmpStrainData.push_back(thisStrain); //add to the temporary vector
-		tmpStressData.push_back(thisStress);
-	}
+	// 	tmpStrainData.push_back(thisStrain); //add to the temporary vector
+	// 	tmpStressData.push_back(thisStress);
+	// }
 
-	//at this point, we know we have valid data and will return true
-	strainData = tmpStrainData;
-	stressData = tmpStressData;
-	E=stressData[1]/strainData[1]; //youngs modulus is the inital slope
-	sigmaFail = stressData[stressData.size()-1]; //failure stress is the highest stress data point
-	epsilonFail = strainData[strainData.size()-1]; //failure strain is the highest strain data point
-	linear = (dataPointCount==1);
+	// //at this point, we know we have valid data and will return true
+	// strainData = tmpStrainData;
+	// stressData = tmpStressData;
+	// E=stressData[1]/strainData[1]; //youngs modulus is the inital slope
+	// sigmaFail = stressData[stressData.size()-1]; //failure stress is the highest stress data point
+	// epsilonFail = strainData[strainData.size()-1]; //failure strain is the highest strain data point
+	// linear = (dataPointCount==1);
 
-	if (dataPointCount == 1 || dataPointCount == 2){ //linear or bilinear
-		sigmaYield = stressData[1];
-		epsilonYield = strainData[1];
-	}
-	else { //.2% (0.002) strain offset to find a good yield point...
-		setYieldFromData();
-	}
+	// if (dataPointCount == 1 || dataPointCount == 2){ //linear or bilinear
+	// 	sigmaYield = stressData[1];
+	// 	epsilonYield = strainData[1];
+	// }
+	// else { //.2% (0.002) strain offset to find a good yield point...
+	// 	setYieldFromData();
+	// }
 
-	return updateDerived();
+	// return updateDerived();
 }
 
 /*! Specified Young's modulus and failure stress must both be positive.
@@ -426,9 +426,9 @@ CUDA_DEVICE bool TI_Material::updateDerived()
 	_eHat = E/((1-2*nu)*(1+nu));
 
 	//for (TI_vector<TI_Material*>::iterator it = dependentMaterials.begin(); it != dependentMaterials.end(); it++) (*it)->updateAll(); //update material properties of any that depend on this...
-	for (unsigned i=0;i<dependentMaterials.num_main;i++) {
-		dependentMaterials[i]->updateAll();
-	}
+	// for (unsigned i=0;i<dependentMaterials.num_main;i++) {
+	// 	dependentMaterials[i]->updateAll();
+	// }
 	return true;
 }
 

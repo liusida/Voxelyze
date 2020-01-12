@@ -8,7 +8,7 @@
 
 class TI_MaterialVoxel : public TI_Material {
 public:
-	TI_MaterialVoxel( CVX_MaterialVoxel *p );
+	TI_MaterialVoxel( CVX_MaterialVoxel *p, cudaStream_t stream );
 
 	CUDA_DEVICE TI_MaterialVoxel(float youngsModulus=1e6f, float density=1e3f, double nominalSize=0.001); //!< Default Constructor. @param[in] youngsModulus The Young's Modulus (stiffness) of this material in Pascals. @param[in] density The density of this material in Kg/m^3. @param[in] nominalSize The nominal voxel size in meters.
 	CUDA_DEVICE TI_MaterialVoxel(const TI_Material& mat, double nominalSize=0.001); //!< Constructs from an existing material. @param[in] mat Material to construct from. @param[in] nominalSize The nominal voxel size in meters

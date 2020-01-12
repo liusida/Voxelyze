@@ -53,8 +53,8 @@ public:
     int num_d_linkMats;
 
     bool* d_collisionsStale;
-    TI_vector<TI_Collision *>* d_collisions;
-    TI_vector<TI_Collision *> h_collisions;
+    // TI_vector<TI_Collision *>* d_collisions;
+    // TI_vector<TI_Collision *> h_collisions;
 
     /* CUDA Stream */
     cudaStream_t stream;

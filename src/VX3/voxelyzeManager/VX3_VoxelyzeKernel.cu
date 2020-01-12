@@ -17,7 +17,7 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream)
     {
         int i = 0;
         for (auto mat:In->linkMats) {
-            TI_MaterialLink tmp_linkMat( mat );
+            TI_MaterialLink tmp_linkMat( mat, stream );
             VcudaMemcpyAsync( d_linkMats+i, &tmp_linkMat, sizeof(TI_MaterialLink), VcudaMemcpyHostToDevice, stream );
             h_linkMats.push_back( mat );
             i++;
@@ -44,10 +44,10 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream)
         VcudaMemcpyAsync(d_voxels+i, &tmp_voxel, sizeof(TI_Voxel), VcudaMemcpyHostToDevice, stream);
     }
 
-    VcudaMalloc((void**)&d_collisionsStale, sizeof(bool));
+    // VcudaMalloc((void**)&d_collisionsStale, sizeof(bool));
 
-    VcudaMalloc((void **)&d_collisions, sizeof(TI_vector<TI_Collision *>));
-    VcudaMemcpyAsync(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyHostToDevice, stream);
+    // VcudaMalloc((void **)&d_collisions, sizeof(TI_vector<TI_Collision *>));
+    // VcudaMemcpyAsync(d_collisions, &h_collisions, sizeof(TI_vector<TI_Collision *>), VcudaMemcpyHostToDevice, stream);
 
 }
 
@@ -57,7 +57,7 @@ void VX3_VoxelyzeKernel::cleanup() {
     VcudaFree(d_voxels);
     VcudaFree(d_links);
     VcudaFree(d_collisionsStale);
-    VcudaFree(d_collisions);
+    // VcudaFree(d_collisions);
 }
 
 TI_MaterialLink * VX3_VoxelyzeKernel::getMaterialLink(CVX_MaterialLink* vx_mats) {

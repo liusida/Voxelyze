@@ -11,7 +11,7 @@
 class TI_Material {
 public:
 
-	TI_Material( CVX_Material* p );
+	TI_Material( CVX_Material* p, cudaStream_t stream );
 
 	CUDA_DEVICE TI_Material(float youngsModulus=1e6f, float density=1e3f); //!< Default Constructor. @param[in] youngsModulus The Young's Modulus (stiffness) of this material in Pascals. @param[in] density The density of this material in Kg/m^3
 	//CUDA_DEVICE virtual ~TI_Material(void) {}; //!< Destructor. Specified as virtual so we can just keep track of generic material pointers for voxel and link materials.
@@ -51,7 +51,7 @@ public:
 	CUDA_DEVICE float failureStress() const {return sigmaFail;} //!<Returns the failure stress in Pa or -1 if unspecified.
 	CUDA_DEVICE int modelDataPoints() {return d_strainData.size();} //!< Returns the number of data points in the current material model data arrays.
 	CUDA_DEVICE const float* modelDataStrain() {return &(d_strainData[0]);} //!< Returns a pointer to the first strain value data point in a continuous array. The number of values can be determined from modelDataPoints(). The assumed first value of 0 is included.
-	CUDA_DEVICE const float* modelDataStress() {return &stressData[0];} //!< Returns a pointer to the first stress value data point in a continuous array. The number of values can be determined from modelDataPoints(). The assumed first value of 0 is included.
+	CUDA_DEVICE const float* modelDataStress() {return &(d_stressData[0]);} //!< Returns a pointer to the first stress value data point in a continuous array. The number of values can be determined from modelDataPoints(). The assumed first value of 0 is included.
 
 	CUDA_DEVICE void setPoissonsRatio(float poissonsRatio); //!< Defines Poisson's ratio for the material. @param [in] poissonsRatio Desired Poisson's ratio [0, 0.5).
 	CUDA_DEVICE float poissonsRatio() const {return nu;} //!< Returns the current Poissons ratio
@@ -114,10 +114,10 @@ public:
 	float sigmaFail; //!< Failure stress in Pa
 	float epsilonYield; //!< Yield strain
 	float epsilonFail; //!< Failure strain
-	TI_vector<float> strainData; //!< strain data points
+	// TI_vector<float> strainData; //!< strain data points
 	VX3_hdVector<float> hd_strainData;
 	VX3_dVector<float> d_strainData;
-	TI_vector<float> stressData; //!< stress data points
+	// TI_vector<float> stressData; //!< stress data points
 	VX3_hdVector<float> hd_stressData;
 	VX3_dVector<float> d_stressData;
 
@@ -139,8 +139,8 @@ public:
 	//piezo?
 	//compressive strength? (/compressive data)
 	//heat conduction
-
-	TI_vector<TI_Material*> dependentMaterials; //!< Any materials in this list will have updateDerived() called whenever it's called for this material. For example, in Voxelyze this is used for updatng link materials when one or both voxel materials change
+	// dependentMaterials only for combinedMaterial, not used.
+	// TI_vector<TI_Material*> dependentMaterials; //!< Any materials in this list will have updateDerived() called whenever it's called for this material. For example, in Voxelyze this is used for updatng link materials when one or both voxel materials change
 
 };
 

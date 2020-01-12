@@ -139,8 +139,8 @@ public:
 	float previousDt; //remember the duration of the last timestep of this voxel
 
 	TI_Vec3D<float> lastColWatchPosition;
-	TI_vector<TI_Collision*> colWatch;
-	TI_vector<TI_Voxel*> nearby;
+	// TI_vector<TI_Collision*> colWatch;
+	// TI_vector<TI_Voxel*> nearby;
 
 };
 

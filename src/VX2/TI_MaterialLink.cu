@@ -1,12 +1,12 @@
 #include "TI_MaterialLink.h"
 
-TI_MaterialLink::TI_MaterialLink(CVX_MaterialLink* p):
-TI_MaterialVoxel((CVX_MaterialVoxel *)p),
+TI_MaterialLink::TI_MaterialLink(CVX_MaterialLink* p, cudaStream_t stream):
+TI_MaterialVoxel((CVX_MaterialVoxel *)p, stream),
 _a1(p->_a1), _a2(p->_a2), _b1(p->_b1), _b2(p->_b2), _b3(p->_b3),
 _sqA1(p->_sqA1), _sqA2xIp(p->_sqA2xIp), _sqB1(p->_sqB1), 
 _sqB2xFMp(p->_sqB2xFMp), _sqB3xIp(p->_sqB3xIp) {
-	vox1Mat = new TI_MaterialVoxel(p->vox1Mat);
-	vox2Mat = new TI_MaterialVoxel(p->vox2Mat);
+	vox1Mat = new TI_MaterialVoxel(p->vox1Mat, stream);
+	vox2Mat = new TI_MaterialVoxel(p->vox2Mat, stream);
 	//TODO: please remember to free all newly allocated memory after the program works.
 }
 
@@ -66,7 +66,7 @@ CUDA_DEVICE bool TI_MaterialLink::updateAll()
 
 	if (vox1Mat->linear && vox2Mat->linear) setModelLinear(2.0f*vox1Mat->E*vox2Mat->E/(vox1Mat->E+vox2Mat->E), stressFail);
 	else { //at least 1 bilinear or data-based, so build up data points and apply it.
-		TI_vector<float> newStressValues, newStrainValues;
+		VX3_dVector<float> newStressValues, newStrainValues;
 		newStressValues.push_back(0.0f);
 		newStrainValues.push_back(0.0f);
 
