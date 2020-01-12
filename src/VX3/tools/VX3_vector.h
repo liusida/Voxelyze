@@ -5,6 +5,7 @@
 #if !defined(TI_VECTOR_H)
 #define TI_VECTOR_H
 #include <vector>
+#include "VX3.h"
 
 template <typename T>
 class VX3_hdVector {
