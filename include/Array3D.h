@@ -274,6 +274,7 @@ private:
 	Index3D aSize, aOff; //allocated size and offset
 	Index3D cMin, cMax; //current minimum and maximum values in x/y/x currently in 
 
+	friend class CVoxelyze;
 };
 
 #endif

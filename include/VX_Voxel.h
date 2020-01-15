@@ -86,7 +86,10 @@ public:
 	bool isSurface() const {return !isInterior();} //!< Convenience function to enhance code readibility. The inverse of isInterior(). Returns true 1 or more faces are exposed. Returns false if the voxel is surrounded by other voxels on its 6 coordinate faces.
 
 	Vec3D<double> baseSize() const {return mat->size()*(1+temp*mat->alphaCTE);} //!<Returns the nominal size of this voxel (LCS) accounting for any specified temperature and external actuation. Specifically, returns the zero-stress size of the voxel if all forces/moments were removed.
-	double baseSize(linkAxis axis) const {return mat->size()[axis]*(1+temp*mat->alphaCTE);} //!<Returns the nominal size of this voxel in the specified axis accounting for any specified temperature and external actuation. Specifically, returns the zero-stress dimension of the voxel if all forces/moments were removed.
+	double baseSize(linkAxis axis) const {
+		auto ret = mat->size()[axis]*(1+temp*mat->alphaCTE);
+		return ret;
+	} //!<Returns the nominal size of this voxel in the specified axis accounting for any specified temperature and external actuation. Specifically, returns the zero-stress dimension of the voxel if all forces/moments were removed.
 	double baseSizeAverage() const {Vec3D<double> bSize=baseSize(); return (bSize.x+bSize.y+bSize.z)/3.0f;} //!<Returns the average nominal size of the voxel in a zero-stress (no force) state. (X+Y+Z/3)
 
 	Quat3D<double> orientation() const {return orient;} //!< Returns the orientation of this voxel in quaternion form (GCS). This orientation defines the relative orientation of the local coordinate system (LCS). The unit quaternion represents the original orientation of this voxel.
@@ -191,10 +194,14 @@ private:
 	std::vector<CVX_Collision*>* colWatch;
 	std::vector<CVX_Voxel*>* nearby;
 
+	double phaseOffset;
+	bool isDetached; //true if the voxel is on main body, false if it fell on the ground.
 
 	friend class CVoxelyze; //give access to private members directly
 	friend class CVXS_SimGLView; //TEMPORARY
 	friend class CVX_LinearSolver;
+	friend class QVX_Sim;
+	friend class CVX_Sim;
 
 	friend class TI_Voxel;
 };

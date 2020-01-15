@@ -42,6 +42,8 @@ private:
 	float penetrationStiff; //in N/m for these two voxels
 	float dampingC; //damping factor for these two voxels
 	Vec3D<float> force;
+
+	friend class CVoxelyze;
 };
 
 #endif //VX_COLLISION_H

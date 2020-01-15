@@ -32,7 +32,8 @@ CVX_Voxel::CVX_Voxel(CVX_MaterialVoxel* material, short indexX, short indexY, sh
 	lastColWatchPosition=NULL;
 	colWatch=NULL;
 	nearby=NULL;
-
+	isDetached = 0;
+	
 	reset();
 }
 

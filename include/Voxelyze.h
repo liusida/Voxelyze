@@ -91,7 +91,12 @@ public:
 	bool replaceMaterial(CVX_Material* replaceMe, CVX_Material* replaceWith); //!< Replaces all voxels of one material with another material. @param[in] replaceMe material to be replaced @param[in] replaceWith material to replace with. This material must already be a part of the simulation - the pointer will have originated from addMaterial() or material().
 	int materialCount() {return voxelMats.size();} //!< Returns the number of materials currently in this voxelyze object.
 	CVX_Material* material(int materialIndex) {return (CVX_Material*)voxelMats[materialIndex];} //!< Returns a pointer to a material that has been added to this voxelyze object. CVX_Material public member functions can be safely called on this pointer to modify the material. A given index may or may not always return the same material - Use material pointers to keep permanent handles to specific materials. This function is primarily used while iterating through all materials in conjuntion with materialCount(). @param[in] materialIndex the current index of a material. Valid range from 0 to materialCount()-1.
-
+	CVX_Material* getMaterialByName(std::string name) {
+		for (auto mat: voxelMats) {
+			if (mat->myName==name) return mat;
+		}
+		return NULL;
+	}
 
 	CVX_Voxel* setVoxel(CVX_Material* material, int xIndex, int yIndex, int zIndex); //!< Adds a voxel made of material at the specified index. If a voxel already exists here it is replaced. The returned pointer can be safely modified by calling any CVX_Voxel public member function on it. @param[in] material material this voxel is made from. This material must already be a part of the simulation - the pointer will have originated from addMaterial() or material(). @param[in] xIndex the X index of this voxel. @param[in] yIndex the Y index of this voxel. @param[in] zIndex the Z index of this voxel.
 	CVX_Voxel* voxel(int xIndex, int yIndex, int zIndex) const {return voxels(xIndex, yIndex, zIndex);} //!< Returns a pointer to the voxel at this location if one exists, or null otherwise. The returned pointer can be safely modified by calling any CVX_Voxel public member function on it. @param[in] xIndex the X index to query. @param[in] yIndex the Y index to query. @param[in] zIndex the Z index to query.
@@ -130,15 +135,21 @@ public:
 	void enableCollisions(bool enabled = true); //!< Enables or disables a collision watcher that results in voxels resisting penetration with one another. This may slow down the simulation significantly. @param[in] enabled If true, enables the collision detection. Otherwise disables it.
 	bool isCollisionsEnabled(void) const {return collisions;} //!< Returns a boolean value indication if the collision watcher is enabled or not.
 
+	//sticky
+	void enableSticky(bool enabled = true);
+	bool isStickyEnabled(void) const {return sticky_on_collision;}
+	bool stickWhenCollide(CVX_Collision* collision);
+	
 	//info
 	float stateInfo(stateInfoType info, valueType type); //!< Returns a specific piece of information about the current state of the simulation. This method is not gaurenteed threadafe. @param[in] info The class of information desired. @param[in] type The type of the value to be returned.
+
 
 private:
 	double voxSize; //lattice size
 	float currentTime; //current time of the simulation in seconds
 	float ambientTemp;
 	float grav;
-	bool floor, collisions;
+	bool floor, collisions, sticky_on_collision;
 
 	//constants... somewhere else?
 	float boundingRadius; //(in voxel units) radius to collide a voxel at
@@ -184,6 +195,8 @@ private:
 	bool readJSON(rapidjson::Value& vxl);
 
 	friend class TI_VoxelyzeKernel;
+	friend class QVX_Sim;
+	friend class CVX_Sim;
 };
 
 

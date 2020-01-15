@@ -621,7 +621,9 @@ void CVoxelyze::enableCollisions(bool enabled)
 	collisionsStale = true;
 }
 
-
+void CVoxelyze::enableSticky(bool enabled) {
+	sticky_on_collision = enabled;
+}
 
 CVX_MaterialLink* CVoxelyze::combinedMaterial(CVX_MaterialVoxel* mat1, CVX_MaterialVoxel* mat2) 
 {
@@ -700,11 +702,18 @@ void CVoxelyze::updateCollisions()
 	//update the forces!
 
 	int colCount = collisionsList.size();
-#ifdef USE_OMP
+#ifdef USE_OMP_disabled_for_safety_reason
 #pragma omp parallel for
 #endif
 	for (int i=0; i<colCount; i++){
 		collisionsList[i]->updateContactForce();
+	}
+
+	for (int i=0; i<colCount; i++) {
+		if (sticky_on_collision) {
+			if (stickWhenCollide(collisionsList[i])) //only stick one voxel at one step. safety reason.
+				break;
+		}
 	}
 
 }
@@ -729,7 +738,8 @@ void CVoxelyze::regenerateCollisions(float threshRadiusSq)
 	//check each combo of voxels and add a collision where necessary
 	for (std::vector<CVX_Voxel*>::iterator it=voxelsList.begin(); it != voxelsList.end(); it++){
 		CVX_Voxel* pV1 = *it;
-		if (pV1->isInterior()) continue; //don't care about interior voxels here.
+		if (pV1->isInterior())
+			continue; //don't care about interior voxels here.
 		*pV1->lastColWatchPosition = (Vec3D<float>)pV1->pos; //remember where collisions were last calculated at
 
 		for (std::vector<CVX_Voxel*>::iterator jt=it+1; jt != voxelsList.end(); jt++){
@@ -738,7 +748,6 @@ void CVoxelyze::regenerateCollisions(float threshRadiusSq)
 				(pV1->pos-pV2->pos).Length2() > threshRadiusSq || //discard anything outside the watch radius
 				std::find(pV1->nearby->begin(), pV1->nearby->end(), pV2) != pV1->nearby->end()) //discard if in the connected lattice array
 				continue;
-
 			CVX_Collision* pCol = new CVX_Collision(pV1, pV2);
 			collisionsList.push_back(pCol);
 			pV1->colWatch->push_back(pCol);
@@ -800,3 +809,58 @@ float CVoxelyze::stateInfo(stateInfoType info, valueType type)
 }
 
 
+//Sticky
+bool CVoxelyze::stickWhenCollide(CVX_Collision* collision) {
+	if (collision->force != Vec3D<float>(0,0,0)) { //There is a real collision
+		CVX_Voxel* vox1 = collision->voxel1();
+		CVX_Voxel* vox2 = collision->voxel2();
+		if ((vox1->isDetached && !vox2->isDetached) || 
+			(vox2->isDetached && !vox1->isDetached)) {
+			CVX_Voxel *missing_voxel, *main_voxel;
+			if (vox1->isDetached) {
+				missing_voxel = vox1;
+				main_voxel = vox2;
+			} else {
+				main_voxel = vox1;
+				missing_voxel = vox2;
+			}
+
+			int empty_direction = -1;
+			for (int i=0;i<6;i++) { //find a empty link on main voxel for attaching
+				if (main_voxel->links[i]==NULL) {
+					empty_direction = i; break;
+				}
+			}
+			if (empty_direction==-1) {
+				printf("links are already full. WHY!\n");
+				return false;
+			}
+			CVX_Voxel::linkDirection direction_to_stick = (CVX_Voxel::linkDirection) empty_direction;
+
+			//move the missing voxel to the suitable position
+			int newix = main_voxel->ix + xIndexVoxelOffset(direction_to_stick);
+			int newiy = main_voxel->iy + yIndexVoxelOffset(direction_to_stick);
+			int newiz = main_voxel->iz + zIndexVoxelOffset(direction_to_stick);
+
+			// if (newix<0 || newix>voxels.aSize.x || newiy<0 || newiy>voxels.aSize.y || newiz<0 || newiz>voxels.aSize.z)
+			// 	return; //reach the theoretical robot frame, no room for attached voxels
+			// Array3D voxels will automatically increase the volume!!
+
+			voxels.removeValue(missing_voxel->ix, missing_voxel->iy, missing_voxel->iz);
+			missing_voxel->isDetached = false;
+			missing_voxel->ix=newix;
+			missing_voxel->iy=newiy;
+			missing_voxel->iz=newiz;
+			voxels.addValue(newix, newiy, newiz, missing_voxel);
+
+			//add the link
+			printf("%s(%d): addLink( %d, %d, %d, %d );\n", __FILE__, __LINE__, main_voxel->ix, main_voxel->iy, main_voxel->iz, (int)direction_to_stick);
+			addLink(main_voxel->ix, main_voxel->iy, main_voxel->iz, direction_to_stick);
+			
+			collision->force = Vec3D<double>(0,0,0); //not apply force after sticked.
+			return true;
+			
+		}
+	}
+	return false;
+}
