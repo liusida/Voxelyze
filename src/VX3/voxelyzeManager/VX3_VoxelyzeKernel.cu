@@ -1,4 +1,6 @@
 #include "VX3_VoxelyzeKernel.h"
+#include "VX3_MemoryCleaner.h"
+
 /* Sub GPU Threads */
 __global__ void gpu_update_force(TI_Link* links, int num);
 __global__ void gpu_update_voxel(TI_Voxel* voxels, int num, double dt);
@@ -53,11 +55,11 @@ VX3_VoxelyzeKernel::VX3_VoxelyzeKernel(CVoxelyze* In, cudaStream_t In_stream)
 
 void VX3_VoxelyzeKernel::cleanup() {
     //The reason not use ~VX3_VoxelyzeKernel is that will be automatically call multiple times after we use memcpy to clone objects.
-    VcudaFree(d_linkMats);
-    VcudaFree(d_voxels);
-    VcudaFree(d_links);
-    VcudaFree(d_collisionsStale);
-    // VcudaFree(d_collisions);
+    MycudaFree(d_linkMats);
+    MycudaFree(d_voxels);
+    MycudaFree(d_links);
+    MycudaFree(d_collisionsStale);
+    // MycudaFree(d_collisions);
 }
 
 TI_MaterialLink * VX3_VoxelyzeKernel::getMaterialLink(CVX_MaterialLink* vx_mats) {

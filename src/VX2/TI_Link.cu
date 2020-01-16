@@ -34,7 +34,7 @@ TI_Voxel* TI_Link::getDevPtrFromHostPtr(CVX_Voxel* p) {
         return &_kernel->d_voxels[index];
     }
     else {
-        std::cout << "ERROR: voxel for link not found. Maybe the input CVoxelyze* Vx is broken.\n";
+        printf("ERROR: voxel for link not found. Maybe the input CVoxelyze* Vx is broken.\n");
     }
     return NULL;
 }

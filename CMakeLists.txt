@@ -23,7 +23,7 @@ target_link_libraries(voxelyzeManager PUBLIC voxelyze.3.0)
 
 # for Boost
 set(Boost_USE_STATIC_LIBS   ON)
-find_package(Boost REQUIRED COMPONENTS filesystem thread)
+find_package(Boost REQUIRED COMPONENTS filesystem thread chrono)
 target_link_libraries(voxelyze.3.0 PUBLIC ${Boost_LIBRARIES})
 target_link_libraries(voxelyzeManager PUBLIC ${Boost_LIBRARIES})
 

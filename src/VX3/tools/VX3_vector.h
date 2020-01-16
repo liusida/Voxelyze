@@ -74,7 +74,7 @@ public:
         num_main+=1;
         return true;
     }
-    __device__ inline T& operator= (const VX3_dVector<T>& vIn) { //TODO: Unit Test and copy to large
+    __device__ inline VX3_dVector<T>& operator= (const VX3_dVector<T>& vIn) { //TODO: Unit Test and copy to large
         if (vIn.main) {
             sizeof_chunk = vIn.sizeof_chunk;
             num_main = vIn.num_main;
@@ -89,6 +89,7 @@ public:
                 default_memory[i] = vIn.default_memory[i];
             }
         }
+        return *this;
     }
     __device__ inline unsigned size() {return num_main;};
     __device__ inline T& operator[] (unsigned index) {return get(index);};

@@ -1,5 +1,5 @@
 //Instead of reallocate every time, use over-allocation to reduce memory copy.
-
+#ifdef _0
 #if !defined(TI_VECTOR_H)
 #define TI_VECTOR_H
 #include <vector>
@@ -111,3 +111,4 @@ public:
 };
 
 #endif // TI_VECTOR_H
+#endif

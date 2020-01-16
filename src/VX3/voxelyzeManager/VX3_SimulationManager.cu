@@ -1,5 +1,6 @@
 #include "VX3_SimulationManager.h"
 #include "VX3_VoxelyzeKernel.h"
+#include "VX3_MemoryCleaner.h"
 #include "VX_Sim.h"
 
 
@@ -20,6 +21,9 @@ __global__ void CUDA_Simulation(VX3_VoxelyzeKernel *d_voxelyze_3, int num_tasks)
                 printf(COLORCODE_BOLD_RED "\nSimulation %d Diverged.\n" COLORCODE_RESET, i);
                 break;
             }
+            // if (j% 1000==0)
+            //     printf("Time: %f, pos[0]: %f %f %f\n", d_v3->currentTime, d_v3->d_voxels[0].pos.x, d_v3->d_voxels[0].pos.y, d_v3->d_voxels[0].pos.z);
+
         }
         d_v3->updateCurrentCenterOfMass();
         printf(COLORCODE_BLUE "Simulation %d ends.\t" COLORCODE_RESET, i);
@@ -108,6 +112,10 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
         task.put("normAbsoluteDisplacement", p.first);
         task.put("taskId", p.second);
         task.put("VXAFilename", filenames[p.second]);
+        task.put("AbsoluteDistanceInMeter.x", result_voxelyze_kernel[p.second].currentCenterOfMass.x);
+        task.put("AbsoluteDistanceInMeter.y", result_voxelyze_kernel[p.second].currentCenterOfMass.y);
+        task.put("AbsoluteDistanceInMeter.z", result_voxelyze_kernel[p.second].currentCenterOfMass.z);
+        task.put("VoxelSizeInMeter", result_voxelyze_kernel[p.second].voxSize);
         xml_tree.add_child("voxelyzeManager.Report", task);
     }
     pt::write_xml((batchFolder/"report.xml").string(), xml_tree, \
@@ -119,9 +127,9 @@ void VX3_SimulationManager::operator()(VX3_TaskManager* tm, fs::path batchFolder
     for (auto p:h_d_voxelyze_3) {
         p->cleanup();
     }
-    VcudaFree(d_voxelyze_3);
+    MycudaFree(d_voxelyze_3);
     tm->cleanBatchFolder(batchFolder);
-    // delete result_voxelyze_kernel;
+    // delete result_voxelyze_kernel; //ANY PROBLEM??
 
     return;
 }

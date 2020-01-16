@@ -1,7 +1,9 @@
 #include "VX3_TaskManager.h"
 #include "VX3_SimulationManager.h"
+#include "VX3_MemoryCleaner.h"
 
-#include <boost/thread.hpp>
+std::vector<boost::thread> TaskManager_all_threads;
+boost::mutex TaskManager_all_threads_mutex;
 
 bool VX3_TaskManager::checkForCalls() {
     fs::path p = PATH_CALLS;
@@ -53,24 +55,28 @@ void VX3_TaskManager::start(int how_many_runs) {
     makeTaskPool();
 
     int runs = 0;
-    std::vector<boost::thread> all_threads;
     // Initialize the streams
     static const int NUM_STREAMS = 10;
     cudaStream_t stream[NUM_STREAMS];
     for (int i = 0; i < NUM_STREAMS; i++) {
         cudaStreamCreate(stream + i);
     }
-    
+    //Start cleaner thread.
+    VX3_MemoryCleaner_running=true;
+    boost::thread memoryCleaner{ VX3_MemoryCleaner() };
+
     while(1) {
         try {
             if (checkForCalls()) {
                 runs++;
                 printf("New call (%d) received.\n", runs);
                 fs::path batchFolder = batchVXAFiles();
+
                 //Start Simulater and pass batchFolder to it
-                // boost::thread th1(VX3_SimulationManager(), this, batchFolder);
-                all_threads.push_back( boost::thread(VX3_SimulationManager(), this, batchFolder, stream[runs%NUM_STREAMS])); //different batches run in different streams
-                // all_threads.back().join();
+                TaskManager_all_threads_mutex.lock();
+                TaskManager_all_threads.push_back( boost::thread(VX3_SimulationManager(), this, batchFolder, stream[runs%NUM_STREAMS])); //different batches run in different streams
+                TaskManager_all_threads_mutex.unlock();
+
                 if (how_many_runs>0 && runs>=how_many_runs) {
                     printf("Task Manager says: My job is done, bye. (Please wait for them to finish.)\n");
                     break;
@@ -85,7 +91,8 @@ void VX3_TaskManager::start(int how_many_runs) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     // Wait for every threads to finish
-    for (auto &t:all_threads) {
+    for (auto &t:TaskManager_all_threads) {
         t.join();
     }
+    VX3_MemoryCleaner_running = false;
 }

@@ -9,6 +9,16 @@ _sqB2xFMp(p->_sqB2xFMp), _sqB3xIp(p->_sqB3xIp) {
 	vox2Mat = new TI_MaterialVoxel(p->vox2Mat, stream);
 	//TODO: please remember to free all newly allocated memory after the program works.
 }
+TI_MaterialLink::~TI_MaterialLink() {
+	if (vox1Mat) {
+		delete vox1Mat;
+		vox1Mat = NULL;
+	}
+	if (vox2Mat) {
+		delete vox2Mat;
+		vox2Mat = NULL;
+	}
+}
 
 CUDA_DEVICE TI_MaterialLink::TI_MaterialLink(TI_MaterialVoxel* mat1, TI_MaterialVoxel* mat2)
 {

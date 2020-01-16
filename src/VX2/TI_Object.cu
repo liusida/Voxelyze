@@ -1,3 +1,4 @@
+#ifdef _0
 #include <stdio.h>
 #include <iostream>
 #include <thrust/host_vector.h>
@@ -95,3 +96,4 @@ void CTI_Object::Try2() {
     }
 
 }
+#endif

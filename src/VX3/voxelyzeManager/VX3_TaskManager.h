@@ -11,12 +11,16 @@
 #include <cctype>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
+#include <boost/thread.hpp>
 
 #define PATH_POOL "./taskPool/"
 #define PATH_CALLS "./taskPool/CallTaskManager/"
 #define PATH_NEW_TASK "./taskPool/0_NewTasks/"
 #define PATH_RUNNING "./taskPool/1_RunningTasks/"
 #define PATH_FINISHED "./taskPool/2_FinishedTasks/"
+
+extern std::vector<boost::thread> TaskManager_all_threads;
+extern boost::mutex TaskManager_all_threads_mutex;
 
 class VX3_TaskManager
 {

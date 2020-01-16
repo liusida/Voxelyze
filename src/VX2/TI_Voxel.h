@@ -16,6 +16,7 @@ class TI_Voxel {
 public:
 	TI_Voxel()=default;
     TI_Voxel(CVX_Voxel* p, VX3_VoxelyzeKernel* k);
+	~TI_Voxel();
     TI_Link* getDevPtrFromHostPtr(CVX_Link* p);
 
 	CUDA_DEVICE TI_Link* link(linkDirection direction) const {return links[direction];} //!< Returns a pointer to the link object in the specified direction if it exists. Returns null if a link does not exist in this direction.
@@ -116,9 +117,9 @@ public:
     CVX_Voxel* _voxel;
     VX3_VoxelyzeKernel* _kernel;
 
-	TI_MaterialVoxel* mat;
+	TI_MaterialVoxel* mat = NULL;
 	short ix, iy, iz;
-	TI_External* ext;
+	TI_External* ext = NULL;
 
 	TI_Link* links[6]; //links in the 6 cardinal directions according to linkDirection enumeration
 

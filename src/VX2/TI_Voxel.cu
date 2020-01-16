@@ -2,6 +2,7 @@
 #include "TI_Voxel.h"
 #include "TI_VoxelyzeKernel.h"
 #include "VX3_VoxelyzeKernel.h"
+#include "VX3_MemoryCleaner.h"
 
 TI_Voxel::TI_Voxel(CVX_Voxel *p, VX3_VoxelyzeKernel* k): 
 ix(p->ix), iy(p->iy), iz(p->iz),
@@ -47,6 +48,17 @@ previousDt(p->previousDt) {
 	// }
 }
 
+TI_Voxel::~TI_Voxel() {
+	if (mat) {
+		MycudaFree(mat);
+		mat = NULL;
+	}
+	if (ext) {
+		MycudaFree(ext);
+		ext = NULL;
+	}
+}
+
 TI_Link* TI_Voxel::getDevPtrFromHostPtr(CVX_Link* p) {
     //search host pointer in _kernel->h_voxels, get the index and get GPU pointer from _kernel->d_voxels.
 	std::vector<CVX_Link *>::iterator it;
@@ -56,7 +68,7 @@ TI_Link* TI_Voxel::getDevPtrFromHostPtr(CVX_Link* p) {
         return &_kernel->d_links[index];
     }
     else {
-        std::cout << "ERROR: link for voxel not found. Maybe the input CVoxelyze* Vx is broken.\n";
+        printf("ERROR: link for voxel not found. Maybe the input CVoxelyze* Vx is broken.\n");
     }
     return NULL;
 }

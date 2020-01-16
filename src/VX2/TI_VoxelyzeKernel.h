@@ -1,3 +1,4 @@
+#ifdef _0
 #if !defined(TI_VOXELYZE_KERNEL_H)
 #define TI_VOXELYZE_KERNEL_H
 
@@ -62,3 +63,4 @@ public:
 
 
 #endif // TI_VOXELYZE_KERNEL_H
+#endif
